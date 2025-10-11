@@ -1,0 +1,28 @@
+1. Nie mam zdefiniowanej grupy docelowej, jednak wyobrażam sobie, że są to osoby chcące się czegoś nauczyć — a więc aktywnie poszukujące wiedzy i sposobów jej przyswajania. W związku z tym przyjmijmy, że personami są:
+
+osoba ucząca się języków,
+
+osoba przygotowująca się do egzaminu,
+
+osoba ucząca się do rozmowy o pracę.
+
+2. Użytkownik nie ma kontroli nad procesem generowania — tzn. nie decyduje o liczbie fiszek ani ich formacie.
+W wersji MVP fiszki są generowane pojedynczo. Użytkownik może zaakceptować fiszkę, wprowadzić w niej zmiany i zaakceptować lub odrzucić. W wersji MVP jedyny dostępny format to pytanie–odpowiedź.
+
+3. Nie — w wersji MVP nie będzie możliwości tworzenia talii ani zestawów.
+
+4. To kwestia techniczna — algorytm zostanie wybrany na późniejszym etapie spośród dostępnych bibliotek.
+
+5. Użytkownik będzie mógł zaakceptować fiszkę, dokonać w niej zmian i zaakceptować lub odrzucić.
+Akceptacja, nawet po modyfikacjach, będzie liczona jako fiszka zaakceptowana, natomiast odrzucona — jako odrzucona.
+
+6. System uwierzytelniania i autoryzacji zostanie zaimplementowany na późniejszym etapie i nie ma wpływu na przebieg obecnego rozumowania.
+
+7. Tak, aplikacja powinna być zaprojektowana w taki sposób, aby można ją było łatwo integrować z innymi dostawcami modeli.
+
+8. To wykracza poza zakres MVP i nie jest przedmiotem tego rozumowania.
+
+9. W wersji MVP nie będzie żadnych opcji formatowania tekstu.
+
+10. Fiszki wygenerowane przez AI są jedynie kandydatami.
+Po zaakceptowaniu przez użytkownika fiszka jest zapisywana w bazie danych i przechowywana do momentu jej usunięcia przez użytkownika lub wraz z usunięciem konta.

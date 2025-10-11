@@ -1,0 +1,43 @@
+
+# Prompt dla Generatora Proof of Concept: 10x-Cards - Generator Fiszki AI
+
+## Cel
+Stworzenie Proof of Concept (PoC) dla kluczowej funkcjonalności aplikacji "10x-cards". PoC skupi się wyłącznie na generowaniu fiszek z tekstu dostarczonego przez użytkownika przy użyciu LLM.
+
+## Kluczowa funkcjonalność do zaimplementowania
+PoC powinno być jednostronicową aplikacją webową z następującym przepływem użytkownika:
+1.  **Wprowadzanie tekstu:** Głównym elementem interfejsu użytkownika jest duże pole tekstowe (`textarea`), w którym użytkownik może wkleić znaczną ilość tekstu (np. 1000-10 000 znaków).
+2.  **Wyzwalacz generowania:** Dostępny jest przycisk z etykietą "Generuj fiszki".
+3.  **Interakcja z API:**
+    *   Po kliknięciu przycisku aplikacja wyświetli stan ładowania.
+    *   Pobierze tekst z pola tekstowego i wyśle go do modelu LLM za pośrednictwem API Openrouter.ai.
+    *   Możesz użyć generycznego modelu do wykonywania instrukcji. Prompt do LLM powinien instruować go, aby wyodrębnił kluczowe informacje z tekstu i sformatował je jako tablicę JSON z parami pytanie-odpowiedź. Na przykład: `[{"question": "Czym jest pojęcie A?", "answer": "Pojęcie A to..."}, {"question": "Wyjaśnij pojęcie B.", "answer": "Pojęcie B odnosi się do..."}]`.
+4.  **Wyświetlanie sugestii:**
+    *   Gdy API zwróci sugestie fiszek, stan ładowania powinien zostać usunięty, a sugestie powinny być wyświetlone jako lista "Proponowane fiszki".
+    *   Każdy element na liście powinien wyraźnie wyświetlać pytanie i odpowiedź.
+5.  **Zarządzanie stanem:** Cały stan aplikacji (wprowadzony tekst, proponowane fiszki, zaakceptowane fiszki) powinien być zarządzany po stronie klienta. Trwałość danych nie jest wymagana; odświeżenie strony może wyczyścić stan.
+
+## Stos technologiczny
+*   **Framework:** Astro
+*   **Komponenty UI:** React (dla interaktywnych części UI), TypeScript
+*   **Stylowanie:** Tailwind CSS
+*   **Biblioteka UI:** shadcn/ui (użyj komponentów takich jak `Button`, `Textarea`, `Card` do budowy interfejsu).
+*   **Usługa AI:** Openrouter.ai. Załóż, że klucz API jest dostępny jako zmienna środowiskowa o nazwie `VITE_OPENROUTER_API_KEY` (używając prefiksu `VITE_` dla dostępu po stronie klienta w Astro).
+
+## Co należy wykluczyć (poza zakresem)
+To PoC jest ściśle ograniczone do opisanej powyżej funkcjonalności. Proszę WYKLUCZYĆ następujące elementy:
+*   BRAK uwierzytelniania użytkownika (logowanie, rejestracja, konta użytkowników).
+*   BRAK integracji z bazą danych (połączenie z Supabase nie jest potrzebne).
+*   BRAK routingu ani wielu stron.
+*   BRAK formularzy do ręcznego tworzenia fiszek.
+*   BRAK logiki powtórek interwałowych ani widoków "sesji nauki".
+*   BRAK trwałości danych między sesjami przeglądarki.
+
+## Wymagany proces
+1.  **Najpierw planowanie:** Przed napisaniem jakiegokolwiek kodu musisz najpierw wygenerować szczegółowy plan rozwoju. Plan ten powinien zawierać:
+    *   Proponowaną strukturę plików i katalogów.
+    *   Podział na komponenty React, które utworzysz (np. `TextInput`, `FlashcardList`, `FlashcardItem`) i ich odpowiednie zadania.
+    *   Opis krok po kroku, jak zbudujesz i zintegrujesz te komponenty.
+2.  **Uzyskaj zatwierdzenie:** **Co najważniejsze, musisz przedstawić ten plan do przeglądu i poczekać na wyraźne zatwierdzenie przed przejściem do generowania kodu i implementacji.**
+
+Twoim ostatecznym wynikiem powinna być kompletna, działająca aplikacja PoC oparta na zatwierdzonym planie.

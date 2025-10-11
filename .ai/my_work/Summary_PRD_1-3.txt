@@ -1,0 +1,40 @@
+<conversation_summary>
+<decisions>
+Grupa docelowa: Persony zdefiniowane jako: osoba ucząca się języków, osoba przygotowująca się do egzaminu i osoba ucząca się do rozmowy o pracę.
+Generowanie fiszek: Proces jest w pełni zautomatyzowany, bez możliwości konfiguracji przez użytkownika. Fiszki generowane są pojedynczo, w formacie pytanie-odpowiedź.
+Interakcja z fiszką: Użytkownik może zaakceptować, zmodyfikować i zaakceptować, lub odrzucić wygenerowaną fiszkę. Nie ma możliwości tworzenia w pełni manualnych fiszek od zera.
+Organizacja treści: W wersji MVP nie będzie funkcjonalności talii, zestawów ani tagowania do grupowania fiszek.
+Algorytm powtórek: Zostanie zintegrowana gotowa biblioteka implementująca algorytm powtórek. Wybór konkretnej biblioteki jest decyzją techniczną na późniejszy etap.
+Ograniczenia tekstu: Tekst wejściowy do generowania fiszek musi mieć długość od 1000 do 10 000 znaków.
+Dane i analityka: System będzie zliczał akceptacje i odrzucenia fiszek w celu mierzenia wskaźników sukcesu. Treść odrzuconych fiszek nie będzie przechowywana.
+UI/UX: Aplikacja będzie miała minimalistyczny interfejs z wyraźnym polem tekstowym i przyciskiem do generowania. Placeholder w polu tekstowym poinstruuje użytkownika o jego przeznaczeniu.
+Architektura: Aplikacja musi być zaprojektowana w sposób modułowy, aby umożliwić w przyszłości łatwą wymianę modelu AI.
+Poza zakresem MVP: System kont użytkowników, monetyzacja, opcje formatowania tekstu oraz dedykowane komunikaty o błędach generowania nie wchodzą w zakres MVP.
+</decisions>
+<matched_recommendations>
+Projekt interfejsu: Należy zaprojektować jasny i powtarzalny proces generowania kolejnych fiszek z tego samego tekstu, np. poprzez wyraźny przycisk "Stwórz kolejną fiszkę".
+Tryb nauki: Interfejs do nauki powinien być oddzielony od interfejsu tworzenia fiszek i prezentować karty zgodnie z logiką wybranego algorytmu powtórek.
+Limity wejściowe: Należy zdefiniować i zakomunikować użytkownikowi w interfejsie rozsądny limit znaków (1000-10000) dla wklejanego tekstu w celu utrzymania jakości generowania.
+Onboarding użytkownika: Pierwszy ekran aplikacji powinien być maksymalnie prosty i skupiony na jednej akcji: dużym polu tekstowym z tekstem zachęcającym (placeholder) i widocznym przyciskiem.
+Elastyczność techniczna: System powinien być od początku projektowany w sposób elastyczny, umożliwiający łatwą wymianę modeli AI, aby zminimalizować ryzyko związane z niską jakością generowanych fiszek.
+</matched_recommendations>
+<prd_planning_summary>
+Na podstawie zebranych informacji, PRD dla MVP powinno opisywać prostą aplikację webową, której głównym celem jest walidacja hipotezy o użyteczności fiszek generowanych przez AI.
+a. Główne wymagania funkcjonalne:
+Rdzeń: Użytkownik wkleja tekst (1000-10000 znaków), a system generuje pojedynczą fiszkę w formacie pytanie-odpowiedź.
+Cykl generowania: Po wygenerowaniu fiszki, użytkownik ma trzy opcje: zaakceptować, edytować i zaakceptować, lub odrzucić. Następnie może uruchomić generowanie kolejnej fiszki z tego samego tekstu.
+Przechowywanie: Zaakceptowane fiszki są zapisywane na koncie użytkownika.
+Nauka: Dostępny jest tryb nauki, który prezentuje użytkownikowi zapisane fiszki zgodnie z logiką zintegrowanego algorytmu spaced repetition.
+b. Kluczowe historie użytkownika i ścieżki korzystania:
+Generowanie fiszek: Jako użytkownik, chcę wkleić fragment moich notatek, aby aplikacja automatycznie stworzyła z nich fiszkę, co pozwoli mi szybko przygotować materiały do nauki.
+Ścieżka: Użytkownik wchodzi na stronę główną -> Wkleja tekst w pole tekstowe -> Klika "Stwórz fiszkę" -> AI generuje kandydata -> Użytkownik edytuje treść i klika "Akceptuj" -> Fiszka zostaje zapisana.
+Nauka z fiszkami: Jako użytkownik, chcę mieć tryb powtórek, który inteligentnie wybiera fiszki do nauki, abym mógł efektywnie utrwalać wiedzę.
+Ścieżka: Użytkownik przechodzi do sekcji "Nauka" -> Aplikacja prezentuje mu pierwszą fiszkę zgodnie z algorytmem -> Użytkownik ocenia swoją znajomość odpowiedzi -> Aplikacja prezentuje kolejną fiszkę.
+c. Ważne kryteria sukcesu i sposoby ich mierzenia:
+Wskaźnik akceptacji AI: 75% fiszek wygenerowanych przez AI jest akceptowanych przez użytkownika (również po edycji).
+Pomiar: System musi zliczać stosunek liczby zaakceptowanych fiszek do całkowitej liczby wygenerowanych kandydatów (przyjęte / (przyjęte + odrzucone)).
+</prd_planning_summary>
+<unresolved_issues>
+Zarządzanie fiszkami przy zróżnicowanej tematyce: Największym zidentyfikowanym ryzykiem dla użyteczności produktu w dłuższej perspektywie jest brak jakiejkolwiek formy grupowania fiszek (np. talie, tagi). Użytkownik uczący się jednocześnie języka obcego i przygotowujący się do egzaminu będzie miał wszystkie fiszki w jednym miejscu, co może prowadzić do chaosu i znacząco obniżyć efektywność nauki. Kwestia ta została świadomie odłożona na okres po MVP, ale jej wpływ na retencję użytkowników powinien być monitorowany.
+</unresolved_issues>
+</conversation_summary>

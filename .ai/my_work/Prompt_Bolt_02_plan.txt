@@ -1,0 +1,170 @@
+This plan outlines the development of a single-page application that generates 5-10 flashcards from user-provided text (1000-10000 characters) using OpenRouter.ai's GPT-3.5-turbo model. The application will be built with Astro, React, TypeScript, and shadcn/ui components.
+
+1. Environment and Configuration Setup
+
+Add VITE_OPENROUTER_API_KEY environment variable to the .env file for OpenRouter.ai API access
+Verify all necessary dependencies are already installed (React, TypeScript, Tailwind CSS, shadcn/ui components)
+Confirm the Astro configuration supports client-side React components with the client:load directive
+2. Type Definitions and Data Models
+
+Create a TypeScript types file at src/types/flashcard.ts defining:
+Flashcard interface with id, question, and answer properties
+GenerationStatus type for tracking loading states (idle, loading, success, error)
+ApiResponse interface for the OpenRouter.ai response structure
+3. API Integration Layer
+
+Create an API utility file at src/lib/openrouter.ts containing:
+Function to communicate with OpenRouter.ai API endpoint (https://openrouter.ai/api/v1/chat/completions)
+Configuration to use the openai/gpt-3.5-turbo model
+Prompt engineering function that instructs the LLM to generate exactly 5-10 question-answer pairs in strict JSON array format
+Request headers including Authorization with API key, HTTP-Referer, and X-Title
+Response parsing logic to extract and validate the JSON array of flashcards
+Comprehensive error handling for network failures, API errors, and invalid responses
+4. Input Validation Utilities
+
+Create a validation utility file at src/lib/validation.ts containing:
+Function to check if text length is between 1000-10000 characters
+Function to return user-friendly validation error messages
+Character count display helper that shows current/max characters
+5. Core React Components
+
+Create FlashcardGenerator.tsx as the main interactive component at src/components/FlashcardGenerator.tsx:
+
+Manage state for input text, character count, generated flashcards, loading status, and error messages
+Import shadcn/ui components (Textarea, Button, Card, Alert)
+Implement real-time character counter showing current count and min/max limits
+Validate input before allowing generation (disable button if text is outside 1000-10000 range)
+Handle form submission and API calls with proper async/await error handling
+Display loading state with spinner during generation
+Render the list of generated flashcards after successful API response
+Show validation and API error messages using Alert component
+Create FlashcardItem.tsx component at src/components/FlashcardItem.tsx:
+
+Display individual flashcard using shadcn/ui Card component
+Show question prominently at the top with bold or larger text
+Show answer below with clear visual separation
+Use consistent spacing and typography
+Add subtle hover effects for interactivity
+Create FlashcardList.tsx component at src/components/FlashcardList.tsx:
+
+Accept array of flashcards as props
+Display "Suggested Flashcards" heading with count (e.g., "Suggested Flashcards (7)")
+Map through flashcards and render FlashcardItem components in a responsive grid
+Show empty state when no flashcards exist
+Add smooth fade-in animation when flashcards appear
+6. User Interface Layout
+
+Update src/pages/index.astro to include:
+Professional page title: "10x-Cards - AI Flashcard Generator"
+Hero section with application name and tagline
+Brief instructions explaining the 1000-10000 character requirement
+Integration of FlashcardGenerator component with client:load directive
+Responsive container with proper max-width for readability
+Consistent padding and margins throughout
+7. State Management and User Flow
+
+Implement client-side state management in FlashcardGenerator component:
+Text input state tracking user's pasted content
+Character count state updating in real-time as user types
+Generated flashcards array state (empty by default)
+Loading boolean state for API calls
+Error message string state for validation and API errors
+Create complete user interaction flow:
+User sees large textarea with placeholder text explaining the feature
+Character counter displays below textarea showing "0 / 1000 minimum, 10000 maximum"
+"Generate Flashcards" button is disabled when text is outside valid range
+Button becomes enabled when character count is between 1000-10000
+User clicks enabled button to trigger generation
+Loading spinner appears with message "Generating flashcards..."
+Upon success, "Suggested Flashcards" section appears with 5-10 cards
+Upon error, Alert component shows specific error message
+User can modify text and generate again without page refresh
+Page refresh clears all state (no persistence in PoC)
+8. Styling and Visual Design
+
+Apply Tailwind CSS for responsive, modern design:
+Mobile-first responsive layout (single column on mobile, optimal width on desktop)
+Proper spacing using Tailwind spacing scale (p-4, p-6, p-8, etc.)
+Professional color scheme using blue or teal accent colors
+Clean white/gray background with subtle gradients
+Style the textarea:
+Large input area with minimum height of 300px
+Monospace or readable font
+Placeholder text: "Paste your text here (1000-10000 characters). The AI will generate 5-10 flashcards based on key concepts..."
+Border styling that changes on focus
+Style character counter:
+Display below textarea in small, subtle text
+Turn red when below minimum or above maximum
+Turn green when in valid range
+Style flashcard displays:
+Grid layout (1 column mobile, 2 columns tablet, 2-3 columns desktop)
+Card component with shadow and border
+Question in bold or semibold with larger font
+Answer in regular weight below question
+Consistent padding inside cards
+Gap between cards in grid
+9. Error Handling and User Feedback
+
+Implement validation errors:
+"Text must be at least 1000 characters" when too short
+"Text must not exceed 10000 characters" when too long
+Display using shadcn/ui Alert component with warning variant
+Implement API error handling:
+Network errors: "Unable to connect. Please check your internet connection."
+API key errors: "API configuration error. Please contact support."
+Rate limit errors: "Too many requests. Please wait a moment and try again."
+Invalid response errors: "Failed to generate flashcards. Please try again."
+Provide loading feedback:
+Loading spinner from lucide-react (Loader2 icon with spin animation)
+Disable textarea and button during generation
+Show "Generating flashcards..." text
+Success feedback:
+Smooth transition to showing flashcard list
+Keep input text visible so user can modify and regenerate
+10. OpenRouter.ai Prompt Engineering
+
+Craft precise system and user prompts:
+System message defining the AI's role as a flashcard generator
+User message with clear instructions to analyze text and extract 5-10 key concepts
+Explicit format requirement: JSON array with exactly this structure: [{"question": "...", "answer": "..."}]
+Instruction to make questions clear and self-contained
+Instruction to make answers concise but complete
+Request for diverse question types (definitions, explanations, applications)
+Handle LLM response parsing:
+Extract JSON from potential markdown code blocks
+Validate that response is an array
+Validate each item has question and answer properties
+Generate unique IDs for each flashcard (using crypto.randomUUID or timestamp)
+Handle cases where LLM returns fewer than 5 or more than 10 cards
+11. Testing and Validation Scenarios
+
+Verify complete user flow with test cases:
+Short text (500 chars): Button should be disabled, show validation message
+Valid text (2000 chars): Button enabled, generates 5-10 flashcards successfully
+Long text (15000 chars): Button disabled, show validation message
+Edge case (exactly 1000 chars): Button enabled, works correctly
+Edge case (exactly 10000 chars): Button enabled, works correctly
+Empty input: Button disabled
+API failure simulation: Error message displays correctly
+Multiple generations: Can generate, modify text, and regenerate
+Page refresh: All state clears as expected
+Implementation File Structure
+
+src/
+├── components/
+│   ├── FlashcardGenerator.tsx (main interactive component)
+│   ├── FlashcardList.tsx (list container)
+│   └── FlashcardItem.tsx (individual card display)
+├── lib/
+│   ├── openrouter.ts (API integration)
+│   └── validation.ts (input validation utilities)
+├── types/
+│   └── flashcard.ts (TypeScript interfaces)
+└── pages/
+    └── index.astro (updated main page)
+Summary
+This updated plan incorporates all your specifications: GPT-3.5-turbo model via OpenRouter.ai, generation of 5-10 flashcards, and strict 1000-10000 character input validation. The implementation focuses on delivering a polished, user-friendly PoC that validates the core AI generation feature before expanding to additional functionality.
+
+The character counter provides real-time feedback to guide users toward valid input. The validation layer prevents unnecessary API calls. The error handling ensures users receive clear, actionable feedback in all scenarios. The responsive design and professional styling create a production-ready appearance suitable for user testing and feedback collection.
+
+IMPORTANT REMINDER: I am currently in "plan" mode and cannot implement this plan. To proceed with implementation, please switch to "build" mode by clicking the "Implement this plan" button or clicking the "Plan" button again to toggle modes.
