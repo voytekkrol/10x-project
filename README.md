@@ -1,94 +1,110 @@
-# 10x Astro Starter
+# 10x-cards
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+AI-powered flashcard creation for efficient learning
+
+## Project Description
+
+10x-cards is a web application that enables users to quickly create and manage educational flashcard sets. The app leverages Large Language Model (LLM) APIs to automatically generate high-quality flashcards from provided text, significantly reducing the time and effort required for manual flashcard creation.
+
+The application addresses the challenge of time-consuming manual flashcard creation that discourages users from adopting effective spaced repetition learning methods. With 10x-cards, users can paste text (such as textbook excerpts) and instantly receive AI-generated flashcard suggestions, while still maintaining full control over manual creation and editing.
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+### Frontend
+- **Astro 5** - Fast, efficient web framework with minimal JavaScript
+- **React 19** - Interactive components where needed
+- **TypeScript 5** - Static typing and enhanced IDE support
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **Shadcn/ui** - Accessible React component library
 
-## Prerequisites
+### Backend
+- **Supabase** - Backend-as-a-Service providing:
+  - PostgreSQL database
+  - User authentication
+  - SDK for multiple languages
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+### AI Integration
+- **Openrouter.ai** - Access to multiple LLM providers (OpenAI, Anthropic, Google, etc.) with cost controls and API key limits
 
-## Getting Started
+### CI/CD & Hosting
+- **GitHub Actions** - CI/CD pipelines
+- **DigitalOcean** - Application hosting with Docker
 
-1. Clone the repository:
+## Getting Started Locally
 
-```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
+### Prerequisites
+- Node.js version 22.14.0 (managed with nvm - see `.nvmrc`)
+- npm or yarn package manager
 
-2. Install dependencies:
+### Installation
 
-```bash
-npm install
-```
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd 10x-cards
+   ```
 
-3. Run the development server:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-```
+3. **Set up environment variables**
+   Create a `.env` file in the project root with the following variables:
+   ```env
+   # Supabase configuration
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
 
-4. Build for production:
+   # Openrouter.ai API key
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   ```
 
-```bash
-npm run build
-```
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+   The application will be available at `http://localhost:4321`
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the development server |
+| `npm run build` | Build the application for production |
+| `npm run preview` | Preview the production build locally |
+| `npm run astro` | Access Astro CLI commands |
+| `npm run lint` | Run ESLint to check code quality |
+| `npm run lint:fix` | Run ESLint and automatically fix issues |
+| `npm run format` | Format code using Prettier |
 
-## Project Structure
+## Project Scope
 
-```md
-.
-├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
-```
+### MVP Features
+- **AI Flashcard Generation**: Paste text (1000-10000 characters) to generate flashcard suggestions via LLM API
+- **Manual Flashcard Management**: Create, edit, and delete flashcards manually
+- **User Authentication**: Registration, login, and account management with GDPR compliance
+- **Basic Spaced Repetition**: Integration with existing spaced repetition algorithm
+- **Statistics Tracking**: Monitor AI generation success rates and user engagement
 
-## AI Development Support
+## Project Status
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
+**Current Phase**: MVP Development
 
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
+The project is currently in active development with all core requirements defined and user stories documented. Key development milestones include:
 
-### Cursor IDE
+- ✅ Project setup with Astro, React, and TypeScript
+- ✅ Basic UI components with Tailwind and Shadcn/ui
+- 🔄 User authentication system
+- 🔄 AI flashcard generation integration
+- 🔄 Spaced repetition learning sessions
+- 🔄 Manual flashcard management
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
-
-### GitHub Copilot
-
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
-
-### Windsurf
-
-The `.windsurfrules` file contains AI configuration for Windsurf.
-
-## Contributing
-
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+### Success Metrics
+- Target: 75% of AI-generated flashcards accepted by users
+- Goal: 75% of new flashcards created using AI assistance
 
 ## License
 
-MIT
+Not specified. Consider adding a LICENSE file (MIT recommended for open-source projects).
