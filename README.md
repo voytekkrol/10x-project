@@ -1,12 +1,12 @@
-# 10x-cards
+# 10x-project
 
 AI-powered flashcard creation for efficient learning
 
 ## Project Description
 
-10x-cards is a web application that enables users to quickly create and manage educational flashcard sets. The app leverages Large Language Model (LLM) APIs to automatically generate high-quality flashcards from provided text, significantly reducing the time and effort required for manual flashcard creation.
+10x-project is a web application that enables users to quickly create and manage educational flashcard sets. The app leverages Large Language Model (LLM) APIs to automatically generate high-quality flashcards from provided text, significantly reducing the time and effort required for manual flashcard creation.
 
-The application addresses the challenge of time-consuming manual flashcard creation that discourages users from adopting effective spaced repetition learning methods. With 10x-cards, users can paste text (such as textbook excerpts) and instantly receive AI-generated flashcard suggestions, while still maintaining full control over manual creation and editing.
+The application addresses the challenge of time-consuming manual flashcard creation that discourages users from adopting effective spaced repetition learning methods. With 10x-project, users can paste text (such as textbook excerpts) and instantly receive AI-generated flashcard suggestions, while still maintaining full control over manual creation and editing.
 
 ## Tech Stack
 
@@ -65,7 +65,7 @@ The application addresses the challenge of time-consuming manual flashcard creat
    npm run dev
    ```
 
-   The application will be available at `http://localhost:4321`
+   The application will be available at `http://localhost:3000`
 
 ## Available Scripts
 
