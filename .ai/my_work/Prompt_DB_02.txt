@@ -1,0 +1,61 @@
+<questions>
+List your questions and recommendations here, numbered for clarity:
+
+For example:
+1. Should the `users` entity have a relationship with `posts`?
+
+Recommendation: Yes, the `users` entity should have a relationship with `posts` because users can create posts.
+</questions>
+
+Remember that your goal is to provide a comprehensive list of questions and recommendations that will help create a solid PostgreSQL database schema for the MVP. Focus on clarity, relevance, and accuracy of your outputs. Do not include any additional comments or explanations beyond the specified output format.
+
+Continue this process, generating new questions and recommendations based on the provided context and user responses, until the user explicitly requests a summary.
+
+Remember to focus on clarity, relevance, and accuracy of outputs. Do not include any additional comments or explanations beyond the specified output format.
+
+<questions>
+1.What specific attributes should the users table include beyond the standard Supabase auth fields (email, password)? Should we add fields like created_at, last_login, account_status for GDPR compliance and user management?
+Recommendation: Include created_at (timestamp), last_login (timestamp), and account_status (enum: active, suspended, deleted) to support GDPR requirements and user lifecycle management.
+2.How should flashcards be structured - should we have separate tables for flashcards and flashcard_revisions to track changes, or is a single table with update timestamps sufficient for the MVP?
+Recommendation: Start with a single flashcards table including created_at, updated_at, and created_by_ai (boolean) fields to track basic history, avoiding complexity in the MVP while supporting statistics collection.
+3.What is the exact relationship between users and flashcards - should each flashcard belong to exactly one user (one-to-many), or should we support flashcard sharing between users in the future?
+Recommendation: Implement a strict one-to-many relationship (user_id foreign key in flashcards) to ensure data isolation and security, as the PRD explicitly states no sharing features in MVP.
+4.How should we track learning sessions and spaced repetition progress - do we need a learning_sessions table with foreign keys to flashcards, or should we store repetition metadata directly in the flashcards table?
+Recommendation: Create a learning_sessions table with columns like user_id, flashcard_id, session_date, performance_rating, and next_review_date to support the spaced repetition algorithm integration.
+5.For AI-generated flashcard statistics, should we track generation attempts at the text input level (one input -> multiple flashcards) or at the individual flashcard level?
+Recommendation: Track statistics at both levels - a generation_requests table for text inputs with user_id, input_text_hash, generated_count, and an accepted_count field in flashcards to enable detailed analytics.
+6.What data types and constraints should be used for flashcard content - should the front/back fields be TEXT with length limits, or VARCHAR with specific size constraints?
+Recommendation: Use TEXT type for both front and back fields with CHECK constraints limiting to reasonable lengths (e.g., 5000 characters) to prevent abuse while maintaining flexibility for educational content.
+7.Should we implement soft deletes for GDPR compliance, and if so, how should deleted records be handled in queries and relationships?
+Recommendation: Implement soft deletes with a deleted_at timestamp field in both users and flashcards tables, and use RLS policies to automatically filter deleted records while maintaining referential integrity.
+8.What indexing strategy should be used for performance - which columns need indexes beyond the default primary keys and foreign keys?
+Recommendation: Create indexes on flashcards.user_id, learning_sessions.user_id, learning_sessions.next_review_date, and potentially a composite index on (user_id, created_by_ai) for efficient statistics queries.
+9.How should we handle the spaced repetition algorithm data - should we store algorithm-specific metadata (intervals, ease factors) in the database, or keep it external?
+Recommendation: Store essential spaced repetition data like ease_factor, interval_days, review_count, and last_reviewed directly in the flashcards table to enable efficient querying and algorithm integration.
+10.For scalability, should we consider table partitioning - if so, which tables and by which criteria (time-based for learning sessions, user-based for flashcards)?
+Recommendation: Start without partitioning for the MVP, but design the schema to allow future partitioning of learning_sessions by session_date (monthly partitions) and potentially flashcards by user_id ranges if user growth requires it.
+</questions>
+
+<answers>
+1.Yes, please. The users table should include all required columns for GDPR compliance.
+2.The flashcards table should have created_at and updated_at columns. It should also include a source column that stores one of three values:
+"ai-full" – when the flashcard is generated by AI and not edited,
+"ai-edited" – when it is generated by AI and later edited by the user,
+"manual" – when the flashcard is created manually by the user.
+3.The relationship between flashcards and users is one-to-many. Flashcard sharing is not planned.
+4.Within the MVP scope, we will handle flashcard generation sessions. Learning session tracking will be part of a future iteration and is out of the MVP scope.
+5.We should track generation sessions. There should be a Generations entity with the following fields:
+id (bigserial)
+user_id (FK)
+model
+generated_count
+accepted_unedited_count
+accepted_edited_count
+source_text_hash
+source_text_length
+6.There should be a character limit: 200 characters for the front and 500 characters for the back.
+7.Add a deleted_at field for both users and flashcards.
+8.Apply all recommendations regarding indexes.
+9.The repetition algorithm will work independently of the database metadata, so no additional data storage is needed.
+10.This point is out of the MVP scope.
+</answers>

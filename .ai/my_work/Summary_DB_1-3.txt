@@ -1,0 +1,65 @@
+<conversation_summary>
+<decisions>
+Users table will include: id, email, encrypted_password, confirmed_at, created_at, updated_at, last_login, and deleted_at for GDPR compliance.
+Flashcards table will have created_at, updated_at, and a source column with VARCHAR type storing values: "ai-full", "ai-edited", "manual".
+One-to-many relationship between users and flashcards with no sharing capabilities.
+MVP scope includes flashcard generation tracking via a Generations entity with fields: id (bigserial), user_id (FK), model, generated_count, accepted_unedited_count, accepted_edited_count, source_text_hash, source_text_length.
+Generation errors will be stored in Generation_error_logs table with fileds: model, source_text_hash, source_text_length, error_code, error_message, created_at
+Character limits: 200 characters for front field, 500 characters for back field.
+Soft deletes implemented with deleted_at timestamp field in both users and flashcards tables.
+Counter fields (generated_count, accepted_unedited_count, accepted_edited_count) use INTEGER data type.
+SHA256 hashing for source_text_hash field.
+User deletion preserves related generations and flashcards for statistical purposes, handled at application level.
+No additional partial indexes, audit logging tables, model ENUM validation, or database views for MVP.
+CHECK constraints implemented at database level for character limits.
+Basic indexing on flashcards.user_id, generations.user_id, and composite indexes as recommended.
+Repetition algorithm works independently without database metadata storage.
+Partitioning and advanced performance monitoring features are out of MVP scope.
+</decisions>
+<matched_recommendations>
+Include GDPR compliance fields in users table - ACCEPTED (implemented with specific column list including, last_login, deleted_at).
+Use created_at and updated_at timestamps in flashcards table - ACCEPTED.
+Implement source column for flashcard origin tracking - ACCEPTED (VARCHAR with CHECK constraints instead of ENUM).
+One-to-many relationship between users and flashcards - ACCEPTED.
+Generations entity for AI generation statistics tracking - ACCEPTED (with specified fields).
+Soft deletes with deleted_at field - ACCEPTED.
+INTEGER data type for counter fields - ACCEPTED.
+SHA256 hashing for text deduplication - ACCEPTED.
+Application-level handling of soft deletes - ACCEPTED (to preserve statistical data).
+CHECK constraints for character limits - ACCEPTED.
+Basic indexing strategy - ACCEPTED (applied all recommendations).
+Independent repetition algorithm - ACCEPTED (no database metadata storage).
+No partitioning for MVP - ACCEPTED.
+</matched_recommendations>
+<database_planning_summary>
+The database planning conversation focused on creating a PostgreSQL schema for a flashcard learning application MVP using Supabase. Key requirements include user authentication, flashcard creation (manual and AI-generated), GDPR compliance, and statistics tracking.
+Main requirements for the database schema:
+Support user registration/login with GDPR-compliant data handling
+Store flashcards with front/back content, creation metadata, and source tracking
+Track AI generation sessions with statistics on acceptance rates
+Implement soft deletes for data retention compliance
+Ensure data isolation between users
+Support efficient querying for user dashboards and statistics
+Key entities and their relationships:
+users: Core entity with authentication fields and GDPR compliance columns
+flashcards: Contains question/answer content with user ownership and source metadata
+generations: Tracks AI generation sessions with statistical counters
+Relationships: users (1) → flashcards (many), users (1) → generations (many)
+Important security and scalability concerns:
+Row-level security to ensure users only access their own data
+Soft deletes to maintain referential integrity while supporting GDPR deletion rights
+SHA256 hashing for text deduplication to prevent duplicate processing
+Character limits enforced at database level to prevent abuse
+Indexing strategy focused on user-specific queries and statistics aggregation
+Application-level handling of user deletion to preserve statistical data integrity
+Database design decisions:
+VARCHAR with CHECK constraints for categorical data instead of ENUMs
+INTEGER counters for statistics (not SMALLINT) for future scalability
+No audit logging or advanced performance monitoring in MVP scope
+No table partitioning or materialized views for initial implementation
+Independent spaced repetition algorithm with no database state management
+</database_planning_summary>
+<unresolved_issues>
+No unresolved issues remain. All database planning questions have been addressed with specific implementation decisions made for the MVP scope.
+</unresolved_issues>
+</conversation_summary>
