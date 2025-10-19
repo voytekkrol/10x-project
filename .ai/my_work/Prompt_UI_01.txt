@@ -1,0 +1,132 @@
+<questions>
+1.What are the MVP’s top-level views and routes?
+Recommendation: Use /generate, /generations, /generations/:id, /flashcards, /flashcards/:id (modal), /study, /auth/login, /auth/register, /settings/account; protect app routes via middleware and redirect unauthenticated users to /auth/login.
+2.How should the Generate view enforce input constraints, show progress, and indicate cached results?
+Recommendation: Enforce 1,000–10,000 chars with live counter and disabled submit; show indeterminate loader with elapsed time; display a “Cached” badge when "cached": true, plus generated_count and duration.
+3.Should proposal acceptance be per-card or batch, and how do we tag edited vs unedited for POST /api/flashcards?
+Recommendation: Support per-card accept/reject with inline edit; batch “Save selected” submits multiple POSTs, setting source to ai-full or ai-edited and including generation_id; persist unsaved selections locally.
+4.What list controls are needed for Flashcards (GET /api/flashcards)?
+Recommendation: Provide page/limit, source filter, optional generation_id filter, and sort by created/updated; reflect state in URL params; consume RFC5988 Link headers when present.
+5.Should editing/deleting a flashcard use a modal or dedicated page?
+Recommendation: Use a modal drawer over the list for quick edits; apply optimistic PUT/DELETE with rollback on error; require confirm for DELETE and show a brief success toast.
+6.What should the Generations list/detail display and how should it link to flashcards?
+Recommendation: List shows model, created_at, source_text_length, generated_count, duration; detail shows proposals summary and accepted flashcards with link to /flashcards?generation_id=....
+7.How will the Study Session source its scheduled cards given no dedicated endpoints?
+Recommendation: For MVP, run the SRS client-side on user’s flashcards and store scheduling fields in the same resource; if needed, add minimal endpoints/fields later, but don’t block UI on server scheduling.
+8.What client state/data fetching strategy should we adopt?
+Recommendation: Use TanStack Query for all API calls with keys mirroring endpoint + params; persist cache to sessionStorage; use optimistic updates for PUT/DELETE and invalidate queries on success.
+9.How should API errors and rate limits be surfaced in the UI?
+Recommendation: Normalize on the API’s error schema; show inline field errors for 422, toast for generic errors, and a retry-after countdown for 429 using rate-limit headers; add a global error boundary.
+10.What design system, responsiveness, accessibility, and i18n choices apply?
+Recommendation: Use Shadcn/ui + Tailwind with a shared theme (light/dark), responsive grid for cards, keyboard navigation, labeled inputs, aria-live toasts, focus states, and Polish-first i18n with English-ready keys.
+</questions>
+
+<answers>
+
+1. Auth screen, dashboard, generations screen, flashcards list screen (with a modal to edit a flashcard and a button to delete a flashcard), and user panel.
+
+2. Enforce **1,000–10,000 characters** with a live counter and disabled submit when out of range; show an indeterminate loader with elapsed time during generation; include `generated_count` and `duration` in the response. There is no caching in the current design, so I’m not sure what was meant by “display a **Cached** badge when `cached: true`.”
+
+3. Support per-card **accept / reject** with inline edit. Batch “Save selected” should submit multiple POSTs, setting `source` to `ai-full` or `ai-edited` and including `generation_id`. Persist unsaved selections locally (client-side).
+
+4. Recommendation: provide pagination (`page`/`limit`), a `source` filter, an optional `generation_id` filter, and sorting by `created` / `updated`. Reflect state in URL params and consume RFC5988 `Link` headers when present.
+
+5. Recommendation: use a modal/drawer over the list for quick edits; apply optimistic `PUT`/`DELETE` with rollback on error; require confirmation for `DELETE` and show a brief success toast.
+
+6. The generations list is out of scope for the MVP — I will return to it in a later iteration.
+
+7. For MVP, run the SRS (spaced-repetition) client-side on the user’s flashcards and store scheduling fields in the same resource. Add minimal endpoints/fields later if needed, but don’t block the UI on server-side scheduling.
+
+8. For now we will use the built-in React state mechanisms (hooks + React Context). No additional caching is required.
+
+9. Normalize on the API’s error schema: show inline field errors for `422`, show a toast for generic errors, and show a retry-after countdown for `429` using rate-limit headers. Add a global error boundary.
+
+10. Use `shadcn/ui` + Tailwind with a shared theme (light/dark). Implement a responsive grid for cards, keyboard navigation, labeled inputs, `aria-live` toasts, visible focus states, and Polish-first i18n with English-ready keys.
+
+</answers>
+
+<questions>
+1.Should “Generations screen” mean only the Generate view (no history) for MVP?
+Recommendation: Yes—implement only a Generate view on the dashboard; omit generation history/routes until a later iteration.
+2.How should we count and validate input length for generation (trim/whitespace/newlines)?
+Recommendation: Count after trimming; normalize whitespace/newlines; enforce 1,000–10,000 with live counter, disabled submit, and unload-warning; autosave draft to localStorage (debounced).
+3.What is the expected max number of AI proposals and required list behaviors?
+Recommendation: Aim for ≤50 proposals; support per-card accept/reject, inline edit, “Select all,” and keyboard shortcuts (A accept, R reject, E edit, S save); persist selection in Context + localStorage.
+4.How should batch “Save selected” handle failures and duplicates?
+Recommendation: Submit sequentially with progress; mark ai-edited if edited, else ai-full, include generation_id; deduplicate by normalized front+back; retry failed items individually and report a concise summary.
+5.What are the Flashcards list defaults for paging, sorting, and filters?
+Recommendation: Default limit=20, sort by -created_at; filters for source and optional generation_id; reflect state in URL; read RFC5988 Link headers when present; use classic pagination (not infinite scroll).
+6.How should the edit modal handle concurrency and destructive actions?
+Recommendation: Fetch current card on open and compare updated_at; if mismatch, prompt to refresh/merge; require confirm for DELETE; use optimistic updates with rollback and an optional short “Undo” toast.
+7.What initial SRS fields and review flow should the Study Session use?
+Recommendation: Use client-only dueAt, interval, ease, streak; three-button grading; persist session progress locally for MVP; defer server fields/endpoints to a later iteration.
+8.Where should we centralize UI state without a data-fetching library?
+Recommendation: Create lightweight AuthContext, ProposalsContext, and an Api helper (abort, retries, JSON/error normalization); keep per-view state local; no background prefetch or caching beyond in-memory and localStorage drafts.
+9.How should authentication and route protection work across SSR/CSR?
+Recommendation: Protect /app/* via Astro middleware using Supabase session; on API 401, attempt token refresh then redirect to /auth/login; gate protected views behind an auth guard with a small loading state.
+10.What accessibility, theming, and i18n conventions should be standardized?
+Recommendation: Use Shadcn/ui Dialog/Drawer/Toast/Pagination with Tailwind; ensure focus traps, visible focus, and aria-live toasts; Polish default i18n via i18next (English-ready keys); system light/dark with in-app toggle.
+</questions>
+
+<answers>
+
+1.Yes — implement only the Generate view on the dashboard; omit generation history and related routes until a later iteration.
+
+2.Count characters after trimming and normalizing whitespace/newlines. Enforce the 1,000–10,000 range with a live counter, disabled submit button, and unload warning. Autosave drafts to localStorage (debounced).
+
+3.Limit to ≤10 proposals. Support per-card accept/reject, inline edit, and “Select all.”
+
+4.Submit sequentially with progress tracking. Mark as ai-edited if edited, otherwise as ai-full. Include generation_id. Deduplicate by normalized front + back. Retry failed items individually and display a concise summary.
+
+5.Use limit=20 by default and sort by -created_at. Provide filters for source and optional generation_id. Reflect state in the URL. Read RFC5988 Link headers when present. Use classic pagination (not infinite scroll).
+
+6.No need for additional handling — just attempt deletion with an optimistic update.
+
+7.The study session is out of scope for the MVP.
+
+8.Manage UI state using React hooks and React Context.
+
+9.Protect /app/* routes via Astro middleware using the Supabase session. On API 401, attempt a token refresh; if it fails, redirect to /auth/login. Gate protected views behind an auth guard with a small loading state.
+
+10.Use shadcn/ui (Dialog, Drawer, Toast, Pagination) with Tailwind CSS. Ensure focus traps, visible focus states, and aria-live toasts. Implement Polish as the default i18n via i18next (English-ready keys). Support system light/dark mode with an in-app toggle.
+
+
+---
+
+You are an AI assistant whose task is to summarize the conversation about UI architecture planning for MVP and prepare a concise summary for the next stage of development. In the conversation history you will find the following information:
+1. Product Requirements Document (PRD)
+2. Tech stack information
+3. API plan
+4. Conversation history containing questions and answers
+5. UI architecture recommendations
+
+Your task is to:
+1. Summarize the conversation history, focusing on all decisions related to UI architecture planning.
+2. Match the model's recommendations to the answers given in the conversation history. Identify which recommendations are relevant based on the discussion.
+3. Prepare a detailed conversation summary that includes:
+   a. Main UI architecture requirements
+   b. Key views, screens, and user flows
+   c. API integration and state management strategy
+   d. Responsiveness, accessibility, and security considerations
+   e. Any unresolved issues or areas requiring further clarification
+4. Format the results in the following way:
+
+<conversation_summary>
+<decisions>
+[List decisions made by the user, numbered].
+</decisions>
+<matched_recommendations>
+[List of the most relevant recommendations matched to the conversation, numbered]
+</matched_recommendations>
+<ui_architecture_planning_summary>
+[Provide a detailed conversation summary, including the elements listed in step 3].
+</ui_architecture_planning_summary>
+<unresolved_issues>
+[List any unresolved issues or areas requiring further clarification, if any exist]
+</unresolved_issues>
+</conversation_summary>
+
+The final output should contain only content in markdown format. Ensure your summary is clear, concise, and provides valuable information for the next stage of UI architecture planning and API integration.
+
+
+

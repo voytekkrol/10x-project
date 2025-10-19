@@ -1,0 +1,60 @@
+<conversation_summary>
+<decisions>
+Implement only the Generate view on the dashboard for MVP; omit generation history/routes.
+Enforce 1,000–10,000 chars after trim/normalize; live counter; disabled submit; unload warning; autosave draft to localStorage (debounced).
+Limit AI proposals to ≤10; support per-card accept/reject, inline edit, and “Select all”.
+Batch “Save selected” posts sequentially with progress; mark source as ai-full/ai-edited; include generation_id; deduplicate by normalized front+back; retry failures individually; show concise summary.
+Flashcards list defaults: limit=20, sort by -created_at; filters for source and optional generation_id; reflect state in URL; consume RFC5988 Link headers; use classic pagination.
+Edit in modal/drawer; deletion via optimistic update (no extra handling).
+Study session is out of scope for MVP.
+Manage UI state with React hooks + React Context; no additional client caching layer.
+Protect /app/* with Astro middleware using Supabase session; on 401 attempt refresh, else redirect to /auth/login; use an auth guard with small loading state.
+Use shadcn/ui + Tailwind; ensure focus traps, visible focus states, aria-live toasts; Polish-first i18n via i18next with English-ready keys; support system light/dark with in-app toggle.
+Normalize API error handling (schema-based), show inline 422 errors, toast generic errors, and display retry-after countdown for 429; add a global error boundary.
+Do not surface “cached result” UI for generations in MVP.
+</decisions>
+<matched_recommendations>
+Generate view only (no history) — Accepted and scoped for MVP.
+Input length validation, loader with elapsed time, include generated_count/duration — Accepted (no “cached” badge).
+Per-card accept/reject with inline edit; batch save with ai-full/ai-edited and generation_id; persist selections locally — Accepted.
+Flashcards list with pagination, filters, sorting, URL sync, and Link headers — Accepted.
+Edit via modal/drawer; optimistic update for PUT/DELETE — Accepted (delete: no extra handling).
+Generations list/detail — Deferred (out of scope).
+Study session — Deferred (out of scope).
+Client state strategy — Modified to React hooks + Context (no TanStack Query).
+Auth and route protection via middleware + guard — Accepted.
+Accessibility, theming, i18n standards with shadcn/ui + Tailwind + i18next — Accepted.
+Error handling and 429 countdown with global error boundary — Accepted.
+</matched_recommendations>
+<ui_architecture_planning_summary>
+Main UI architecture requirements:
+Routes under /auth/* (login/register) and protected /app/* (dashboard/generate, flashcards, user panel).
+Protected routing via Astro middleware (Supabase session) and client auth guard.
+UI kit: shadcn/ui (Dialog, Drawer, Toast, Pagination) + Tailwind; Polish-first i18n with i18next; system theme with toggle.
+Key views, screens, and user flows:
+Auth: login/register; on success redirect to /app/generate.
+Dashboard/Generate: textarea with live character count (1,000–10,000 after trim/normalize); disabled submit when out of range; unload warning; draft autosave; submit triggers indeterminate loader with elapsed time; response shows ≤10 proposals.
+Proposal review: per-card accept/reject, inline edit, “Select all”; local persistence of selection; batch “Save selected” posts sequentially with progress, dedup on normalized front+back, marks ai-full/ai-edited, includes generation_id; retries failed items individually and reports summary.
+Flashcards list: classic pagination (limit=20 default), sort -created_at, filters (source, generation_id); state reflected in URL; consume RFC5988 Link headers; open edit modal/drawer for quick edits; deletion is optimistic.
+User panel: basic account-related settings (scope to be defined).
+API integration and state management strategy:
+Endpoints: POST /api/generations; POST/GET/PUT/DELETE /api/flashcards; all with JWT via Supabase.
+Sequential batch posting with progress to prevent rate spikes; handle 422 field errors inline; show toasts for generic errors; handle 429 with retry-after countdown.
+On 401: attempt token refresh; if fail, redirect to /auth/login.
+State: React hooks + Context (e.g., AuthContext, ProposalsContext); localStorage for drafts/selections; no additional client caching; normalize API JSON and errors.
+Responsiveness, accessibility, and security:
+Responsive grid for cards; modal/drawer adapts to small screens; reduced motion respect.
+a11y: focus traps in dialogs, visible focus states, aria-live toasts, labeled inputs.
+Security: protected /app/*, tokens handled by Supabase SDK; avoid exposing service role; no UI for cached generations in MVP.
+Data contracts and validation highlights:
+Generation input: 1,000–10,000 chars (post-trim).
+Flashcard create/update: honor API field constraints; send source and optional generation_id as specified.
+</ui_architecture_planning_summary>
+<unresolved_issues>
+Exact scope and content of the User panel (settings, profile, account deletion).
+Deduplication “normalized front+back” rules (case, whitespace, punctuation, diacritics).
+Progress UI design for batch save (per-item statuses vs aggregate progress bar).
+Precise i18n key structure and fallback language behavior.
+URL structure confirmation for protected routes (e.g., /app/generate, /app/flashcards, /app/user).
+</unresolved_issues>
+</conversation_summary>
