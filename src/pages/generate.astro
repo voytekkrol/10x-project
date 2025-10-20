@@ -1,0 +1,15 @@
+---
+/**
+ * Generate View Page
+ *
+ * Allows users to generate flashcard proposals from source text using AI.
+ * Users can review, accept, edit, or reject proposals before batch-saving them.
+ */
+
+import Layout from "../layouts/Layout.astro";
+import { GenerateViewContainer } from "../components/generate/GenerateViewContainer";
+---
+
+<Layout title="Generate Flashcards - 10x Astro Starter">
+  <GenerateViewContainer client:load />
+</Layout>
