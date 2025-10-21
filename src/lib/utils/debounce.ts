@@ -5,7 +5,7 @@
  * until after the specified delay has elapsed since the last call
  */
 
-export function debounce<T extends (...args: unknown[]) => unknown>(
+export function debounce<T extends (...args: any[]) => any>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {

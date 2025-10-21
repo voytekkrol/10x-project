@@ -4,7 +4,7 @@
  * Manages all state and interactions for the Generate flashcards view
  */
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type {
   SourceTextState,
   GenerationState,
@@ -70,7 +70,7 @@ export function useGenerateFlashcards() {
   const rateLimitTimerRef = useRef<number | null>(null);
 
   // Debounced draft save function (500ms delay)
-  const debouncedSaveDraft = useMemo(() => debounce(saveDraft, 500), []);
+  const debouncedSaveDraft = useRef(debounce(saveDraft, 500)).current;
 
   // ============================================================================
   // Effects

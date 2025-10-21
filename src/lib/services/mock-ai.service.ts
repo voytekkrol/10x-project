@@ -1,11 +1,13 @@
 /**
- * Mock AI Service for flashcard generation
+ * AI Service for flashcard generation using OpenRouter
  *
- * This service simulates AI-powered flashcard generation for development and testing.
- * Replace with actual AI service integration (OpenRouter/OpenAI) in production.
+ * This service integrates with OpenRouter API to generate flashcards using LLMs.
+ * Uses structured JSON output for predictable, type-safe responses.
  */
 
 import type { FlashcardProposalDTO } from "../../types";
+import { OpenRouterService } from "./openrouter.service";
+import type { ResponseFormat } from "../types/openrouter.types";
 
 export interface AIGenerationResult {
   proposals: FlashcardProposalDTO[];
@@ -13,78 +15,127 @@ export interface AIGenerationResult {
   durationMs: number;
 }
 
-const MODEL_NAME = "mock-ai-model";
-const SIMULATED_DELAY_MS = 100;
+/**
+ * Flashcard output schema for structured JSON generation
+ */
+interface FlashcardOutput {
+  flashcards: Array<{
+    front: string;
+    back: string;
+  }>;
+}
 
 /**
- * Simulate processing delay to mimic real AI service
+ * JSON schema definition for flashcard generation
  */
-async function simulateDelay(): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, SIMULATED_DELAY_MS);
+const FLASHCARD_SCHEMA: ResponseFormat = {
+  type: "json_schema",
+  json_schema: {
+    name: "flashcard_generation",
+    strict: true,
+    schema: {
+      type: "object",
+      properties: {
+        flashcards: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              front: { type: "string" },
+              back: { type: "string" },
+            },
+            required: ["front", "back"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["flashcards"],
+      additionalProperties: false,
+    },
+  },
+};
+
+/**
+ * System prompt for flashcard generation
+ */
+const SYSTEM_PROMPT = `You are an expert educational content creator specializing in creating high-quality flashcards for learning.
+
+Your task is to generate exactly 5 flashcards from the provided text. Follow these guidelines:
+
+1. **Questions (front)**: Create clear, specific questions that test understanding of key concepts
+2. **Answers (back)**: Provide concise, accurate answers that directly address the question
+3. **Coverage**: Cover the most important concepts, definitions, and facts from the text
+4. **Difficulty**: Mix difficulty levels - include both foundational and deeper understanding questions
+5. **Clarity**: Use simple, direct language that's easy to understand
+6. **Variety**: Vary question types (what, why, how, define, explain, etc.)
+
+Focus on creating flashcards that will help someone truly learn and retain the material.`;
+
+/**
+ * Creates OpenRouter service instance
+ */
+function createOpenRouterService(): OpenRouterService {
+  // Get configuration from environment
+  const apiKey = import.meta.env.OPENROUTER_API_KEY;
+  const defaultModel = import.meta.env.OPENROUTER_DEFAULT_MODEL || "openai/gpt-4-turbo";
+
+  if (!apiKey) {
+    throw new Error("OPENROUTER_API_KEY environment variable is not set");
+  }
+
+  return new OpenRouterService({
+    apiKey,
+    defaultModel,
+    httpReferer: "https://flashcard-app.com",
+    appName: "FlashcardGenerator",
+    maxRetries: 3,
+    retryDelayMs: 1000,
+    timeoutMs: 30000,
   });
 }
 
 /**
- * Generate predefined mock flashcard proposals
- *
- * @param sourceText - Source text (used for context-aware generation in production)
- * @returns Array of flashcard proposals
- */
-function generateMockProposals(sourceText: string): FlashcardProposalDTO[] {
-  // Extract first few words for context-aware mock generation
-  const firstWords = sourceText.substring(0, 50).trim();
-  const contextHint = firstWords.length < sourceText.length ? `${firstWords}...` : firstWords;
-
-  return [
-    {
-      front: "What is the main topic of this text?",
-      back: `The text discusses: "${contextHint}"`,
-      source: "ai-full",
-    },
-    {
-      front: "What key concept is introduced in this passage?",
-      back: "A fundamental concept that requires understanding and memorization.",
-      source: "ai-full",
-    },
-    {
-      front: "What is an important definition from this text?",
-      back: "A precise definition of a key term or concept.",
-      source: "ai-full",
-    },
-    {
-      front: "What is a critical detail to remember?",
-      back: "An essential fact or detail that supports the main ideas.",
-      source: "ai-full",
-    },
-    {
-      front: "How does this concept relate to broader topics?",
-      back: "This concept connects to wider themes and applications.",
-      source: "ai-full",
-    },
-  ];
-}
-
-/**
- * Generate flashcard proposals from source text
+ * Generate flashcard proposals from source text using AI
  *
  * @param sourceText - The text to generate flashcards from
  * @returns AI generation result with proposals, model name, and duration
+ * @throws {ValidationError} If source text is empty or too short
+ * @throws {OpenRouterError} If AI service fails
  */
 export async function generateFlashcards(sourceText: string): Promise<AIGenerationResult> {
-  const startTime = Date.now();
+  // Validate input
+  if (!sourceText || sourceText.trim().length === 0) {
+    throw new Error("Source text cannot be empty");
+  }
 
-  // Simulate AI processing delay
-  await simulateDelay();
+  if (sourceText.trim().length < 50) {
+    throw new Error("Source text is too short. Please provide at least 50 characters.");
+  }
 
-  // Generate mock flashcard proposals
-  const proposals = generateMockProposals(sourceText);
+  // Create service instance
+  const openRouter = createOpenRouterService();
 
-  const durationMs = Date.now() - startTime;
+  // Generate flashcards using structured output
+  const response = await openRouter.createChatCompletion<FlashcardOutput>({
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: `Generate flashcards from the following text:\n\n${sourceText}` },
+    ],
+    temperature: 0.7,
+    maxTokens: 2000,
+    responseFormat: FLASHCARD_SCHEMA,
+  });
+
+  // Map response to expected format
+  const proposals: FlashcardProposalDTO[] = response.content.flashcards.map((card) => ({
+    front: card.front,
+    back: card.back,
+    source: "ai-full" as const,
+  }));
 
   return {
     proposals,
-    model: MODEL_NAME,
-    durationMs,
+    model: response.model,
+    durationMs: response.durationMs,
   };
 }
