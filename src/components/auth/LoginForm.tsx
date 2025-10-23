@@ -4,9 +4,12 @@
  * Email/password form with validation and error display
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
+import { LoginFormSchema, type LoginFormValues } from "../../lib/validation/auth.schemas";
+import { mapAuthError } from "../../lib/utils/auth-errors";
 
 interface LoginFormProps {
   redirectTo?: string;
@@ -24,31 +27,61 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     // Clear previous errors
     setError(null);
     
-    // Form validation (simple client-side check)
-    if (!email.trim()) {
-      setError("Email is required");
-      return;
-    }
-    
-    if (!password) {
-      setError("Password is required");
+    // Use zod schema for validation
+    const result = LoginFormSchema.safeParse({ email, password });
+    if (!result.success) {
+      // Get the first validation error
+      const fieldErrors = result.error.formErrors.fieldErrors;
+      const firstError = 
+        fieldErrors.email?.[0] || 
+        fieldErrors.password?.[0] || 
+        "Invalid form data";
+      setError(firstError);
       return;
     }
 
     setIsLoading(true);
     
-    // Note: In a real implementation, this would call supabase.auth.signInWithPassword()
-    // But as per instructions, we're not implementing backend functionality yet
-    
-    // Simulate loading state for UI demonstration purposes
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const supabase = getSupabaseBrowser();
+      console.log("Attempting to sign in with:", { email });
       
-      // For demo purposes, show an error for incorrect credentials
-      if (import.meta.env.DEV) {
-        setError("Invalid email or password");
+      const { data, error: supabaseError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      console.log("Sign in response:", { 
+        success: !supabaseError, 
+        hasSession: !!data?.session,
+        error: supabaseError ? supabaseError.message : null
+      });
+
+      if (supabaseError) {
+        // Map the error to a user-friendly message
+        setError(mapAuthError(supabaseError));
+        setIsLoading(false);
+        return;
       }
-    }, 1000);
+      
+      // Success! Redirect to the appropriate page
+      if (data.session) {
+        console.log("Login successful, redirecting to:", redirectTo || "/generate");
+        
+        // Add a small delay before redirecting to ensure cookies are set
+        setTimeout(() => {
+          window.location.href = redirectTo || "/generate";
+        }, 500);
+      } else {
+        console.error("No session returned despite successful login");
+        setError("Authentication error. Please try again.");
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Connection error. Please check your internet");
+      setIsLoading(false);
+    }
   };
 
   return (

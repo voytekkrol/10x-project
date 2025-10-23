@@ -5,29 +5,37 @@
  * Shows user email and logout button
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
+import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
 
 interface NavigationBarProps {
   userEmail?: string;
 }
 
-export function NavigationBar({ userEmail = "user@example.com" }: NavigationBarProps) {
+export function NavigationBar({ userEmail = "" }: NavigationBarProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
     setIsLoggingOut(true);
     
-    // Note: In a real implementation, this would call supabase.auth.signOut()
-    // But as per instructions, we're not implementing backend functionality yet
-    
-    // Simulate loading state for UI demonstration purposes
-    setTimeout(() => {
-      if (import.meta.env.DEV) {
-        window.location.href = "/auth/login";
+    try {
+      // Call Supabase signOut to clear the session
+      const supabase = getSupabaseBrowser();
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Logout error:", error);
+        setIsLoggingOut(false);
+        return;
       }
+      
+      // Redirect to login page
+      window.location.href = "/auth/login";
+    } catch (err) {
+      console.error("Logout failed:", err);
       setIsLoggingOut(false);
-    }, 500);
+    }
   };
 
   return (

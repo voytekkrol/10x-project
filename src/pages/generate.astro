@@ -10,17 +10,33 @@ import Layout from "../layouts/Layout.astro";
 import { GenerateViewContainer } from "../components/generate/GenerateViewContainer";
 import { NavigationBar } from "../components/layout/NavigationBar";
 
-// In a real implementation, we would check if user is authenticated
-// and get the user email from Astro.locals.user
-// But as per instructions, we're not implementing backend functionality yet
-const isAuthenticated = true;
-const userEmail = "user@example.com";
+// Get user information from context.locals
+// This is now handled by middleware, but we'll do an additional check
+const { user } = Astro.locals;
+const userEmail = user?.email || "";
 
 // If user is not authenticated, redirect to login
-if (!isAuthenticated) {
+// This is handled by middleware, but as an extra precaution:
+if (!user) {
   return Astro.redirect("/auth/login?redirect=/generate");
 }
+
+// Add environment variables for client-side components
+const SUPABASE_URL = import.meta.env.SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
 ---
+
+<script is:inline define:vars={{ SUPABASE_URL, SUPABASE_KEY }}>
+  // Set client-side environment variables
+  window.ENV = {
+    SUPABASE_URL,
+    SUPABASE_KEY,
+  };
+  console.log("[Generate Page] Environment variables set:", {
+    hasUrl: !!window.ENV.SUPABASE_URL,
+    hasKey: !!window.ENV.SUPABASE_KEY,
+  });
+</script>
 
 <Layout title="Generate Flashcards - 10x Cards">
   <NavigationBar userEmail={userEmail} client:load />

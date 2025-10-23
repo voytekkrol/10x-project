@@ -5,12 +5,11 @@
  * Redirects to Generate page if authenticated or Login page if not
  */
 
-// In a real implementation, we would check if user is authenticated from Astro.locals.session
-// But as per instructions, we're not implementing backend functionality yet
-const isAuthenticated = false;
+// Get session from Astro.locals
+const { session } = Astro.locals;
 
 // Redirect based on authentication status
-if (isAuthenticated) {
+if (session) {
   return Astro.redirect("/generate");
 } else {
   return Astro.redirect("/auth/login");
