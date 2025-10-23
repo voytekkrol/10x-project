@@ -1,13 +1,12 @@
 /**
  * Navigation Bar Component
- * 
+ *
  * Main navigation bar displayed on authenticated pages
  * Shows user email and logout button
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "../ui/button";
-import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
 
 interface NavigationBarProps {
   userEmail?: string;
@@ -15,21 +14,28 @@ interface NavigationBarProps {
 
 export function NavigationBar({ userEmail = "" }: NavigationBarProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    
+
     try {
-      // Call Supabase signOut to clear the session
-      const supabase = getSupabaseBrowser();
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Logout error:", error);
+      // Call server-side logout API to clear session cookies
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        console.error("Logout error:", data.error);
         setIsLoggingOut(false);
         return;
       }
-      
+
+      console.log("Logout successful, redirecting to login");
+
       // Redirect to login page
       window.location.href = "/auth/login";
     } catch (err) {
@@ -51,12 +57,12 @@ export function NavigationBar({ userEmail = "" }: NavigationBarProps) {
               <span className="text-lg font-semibold text-foreground">Cards</span>
             </a>
           </div>
-          
+
           {/* Navigation links - can be expanded later */}
           <div className="hidden md:block">
             <div className="ml-4 flex items-center space-x-4">
-              <a 
-                href="/generate" 
+              <a
+                href="/generate"
                 className="text-muted-foreground hover:text-foreground hover:bg-accent px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Generate
@@ -64,21 +70,14 @@ export function NavigationBar({ userEmail = "" }: NavigationBarProps) {
               {/* Additional nav links would go here */}
             </div>
           </div>
-          
+
           {/* User menu and logout button */}
           <div className="flex items-center gap-4">
             {/* User email display */}
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              {userEmail}
-            </span>
-            
+            <span className="text-sm text-muted-foreground hidden sm:block">{userEmail}</span>
+
             {/* Logout button */}
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-            >
+            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut}>
               {isLoggingOut ? (
                 <>
                   <svg
@@ -105,22 +104,22 @@ export function NavigationBar({ userEmail = "" }: NavigationBarProps) {
                 </>
               ) : (
                 <>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor" 
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
                     className="w-4 h-4 mr-1"
                     aria-hidden="true"
                   >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" 
-                      clipRule="evenodd" 
+                    <path
+                      fillRule="evenodd"
+                      d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z"
+                      clipRule="evenodd"
                     />
-                    <path 
-                      fillRule="evenodd" 
-                      d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z" 
-                      clipRule="evenodd" 
+                    <path
+                      fillRule="evenodd"
+                      d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z"
+                      clipRule="evenodd"
                     />
                   </svg>
                   Log out
@@ -133,5 +132,3 @@ export function NavigationBar({ userEmail = "" }: NavigationBarProps) {
     </nav>
   );
 }
-
-

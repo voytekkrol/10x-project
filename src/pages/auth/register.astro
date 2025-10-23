@@ -8,16 +8,28 @@
 import AuthLayout from "../../layouts/AuthLayout.astro";
 import { RegisterForm } from "../../components/auth/RegisterForm";
 
-// In a real implementation, we would check if user is already authenticated
-// and redirect to the appropriate page
-// But as per instructions, we're not implementing backend functionality yet
-const isAuthenticated = false;
-
-// If user is already authenticated, redirect
-if (isAuthenticated) {
+// Check if user is already authenticated using session in context.locals
+// This is now handled by middleware, but we'll do an additional check here
+if (Astro.locals.user) {
   return Astro.redirect("/generate");
 }
+
+// Add environment variables for client-side components
+const SUPABASE_URL = import.meta.env.SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
 ---
+
+<script is:inline define:vars={{ SUPABASE_URL, SUPABASE_KEY }}>
+  // Set client-side environment variables
+  window.ENV = {
+    SUPABASE_URL,
+    SUPABASE_KEY,
+  };
+  console.log("[Register Page] Environment variables set:", {
+    hasUrl: !!window.ENV.SUPABASE_URL,
+    hasKey: !!window.ENV.SUPABASE_KEY,
+  });
+</script>
 
 <AuthLayout title="Create Account" description="Sign up to start creating flashcards">
   <RegisterForm client:load />

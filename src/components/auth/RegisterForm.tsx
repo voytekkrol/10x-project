@@ -7,6 +7,9 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
+import { RegisterFormSchema, type RegisterFormValues } from "../../lib/validation/auth.schemas";
+import { mapAuthError } from "../../lib/utils/auth-errors";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -23,78 +26,58 @@ export function RegisterForm() {
     setError(null);
     setSuccess(false);
     
-    // Form validation (simple client-side checks)
-    if (!email.trim()) {
-      setError("Email is required");
-      return;
-    }
-    
-    if (!isValidEmail(email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-    
-    if (!password) {
-      setError("Password is required");
-      return;
-    }
-    
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
-    
-    if (!hasUppercase(password)) {
-      setError("Password must contain at least one uppercase letter");
-      return;
-    }
-    
-    if (!hasLowercase(password)) {
-      setError("Password must contain at least one lowercase letter");
-      return;
-    }
-    
-    if (!hasDigit(password)) {
-      setError("Password must contain at least one number");
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setError("Passwords must match");
+    // Use zod schema for validation
+    const result = RegisterFormSchema.safeParse({ email, password, confirmPassword });
+    if (!result.success) {
+      // Get the first validation error
+      const fieldErrors = result.error.formErrors.fieldErrors;
+      const firstError = 
+        fieldErrors.email?.[0] || 
+        fieldErrors.password?.[0] || 
+        fieldErrors.confirmPassword?.[0] ||
+        "Invalid form data";
+      setError(firstError);
       return;
     }
 
     setIsLoading(true);
     
-    // Note: In a real implementation, this would call supabase.auth.signUp()
-    // But as per instructions, we're not implementing backend functionality yet
-    
-    // Simulate loading state for UI demonstration purposes
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const supabase = getSupabaseBrowser();
+      console.log("Attempting to register with:", { email });
       
-      // For demo purposes, show success state
-      if (import.meta.env.DEV) {
-        setSuccess(true);
+      const { data, error: supabaseError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      console.log("Sign up response:", { 
+        success: !supabaseError, 
+        hasUser: !!data?.user,
+        error: supabaseError ? supabaseError.message : null
+      });
+
+      if (supabaseError) {
+        // Map the error to a user-friendly message
+        setError(mapAuthError(supabaseError));
+        setIsLoading(false);
+        return;
       }
-    }, 1500);
-  };
-  
-  // Simple validation helpers
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-  
-  const hasUppercase = (str: string) => {
-    return /[A-Z]/.test(str);
-  };
-  
-  const hasLowercase = (str: string) => {
-    return /[a-z]/.test(str);
-  };
-  
-  const hasDigit = (str: string) => {
-    return /[0-9]/.test(str);
+      
+      // Success! Show confirmation message
+      if (data.user) {
+        console.log("Registration successful, showing confirmation message");
+        setSuccess(true);
+      } else {
+        console.error("No user returned despite successful registration");
+        setError("Registration error. Please try again.");
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("Connection error. Please check your internet");
+      setIsLoading(false);
+    }
   };
 
   // If registration was successful, show confirmation message
@@ -118,10 +101,15 @@ export function RegisterForm() {
             </svg>
           </div>
         </div>
-        <h3 className="text-lg font-medium text-foreground">Account created!</h3>
-        <p className="text-muted-foreground">
-          Please check your email to confirm your registration.
-        </p>
+        <h3 className="text-lg font-medium text-foreground">Check your email!</h3>
+        <div className="text-muted-foreground space-y-2">
+          <p>
+            We've sent a confirmation link to <strong className="text-foreground">{email}</strong>
+          </p>
+          <p>
+            Please check your email and click the link to activate your account before logging in.
+          </p>
+        </div>
         <Button asChild className="mt-4">
           <a href="/auth/login">Go to Login</a>
         </Button>
