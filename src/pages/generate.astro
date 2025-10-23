@@ -8,8 +8,21 @@
 
 import Layout from "../layouts/Layout.astro";
 import { GenerateViewContainer } from "../components/generate/GenerateViewContainer";
+import { NavigationBar } from "../components/layout/NavigationBar";
+
+// In a real implementation, we would check if user is authenticated
+// and get the user email from Astro.locals.user
+// But as per instructions, we're not implementing backend functionality yet
+const isAuthenticated = true;
+const userEmail = "user@example.com";
+
+// If user is not authenticated, redirect to login
+if (!isAuthenticated) {
+  return Astro.redirect("/auth/login?redirect=/generate");
+}
 ---
 
-<Layout title="Generate Flashcards - 10x Astro Starter">
+<Layout title="Generate Flashcards - 10x Cards">
+  <NavigationBar userEmail={userEmail} client:load />
   <GenerateViewContainer client:load />
 </Layout>

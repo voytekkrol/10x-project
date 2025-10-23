@@ -1,0 +1,29 @@
+---
+/**
+ * Register Page
+ * 
+ * Renders the registration form
+ */
+
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import { RegisterForm } from "../../components/auth/RegisterForm";
+
+// In a real implementation, we would check if user is already authenticated
+// and redirect to the appropriate page
+// But as per instructions, we're not implementing backend functionality yet
+const isAuthenticated = false;
+
+// If user is already authenticated, redirect
+if (isAuthenticated) {
+  return Astro.redirect("/generate");
+}
+---
+
+<AuthLayout title="Create Account" description="Sign up to start creating flashcards">
+  <RegisterForm client:load />
+  <div slot="footer">
+    <p>© {new Date().getFullYear()} 10x Cards. All rights reserved.</p>
+  </div>
+</AuthLayout>
+
+

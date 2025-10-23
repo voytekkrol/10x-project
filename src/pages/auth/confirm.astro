@@ -1,0 +1,102 @@
+---
+/**
+ * Email Confirmation Page
+ * 
+ * Handles the callback for email verification
+ * Verifies the token and redirects to login with success message
+ */
+
+import AuthLayout from "../../layouts/AuthLayout.astro";
+
+// In a real implementation, we would verify the token from the URL
+// and confirm the user's email address via Supabase
+// But as per instructions, we're not implementing backend functionality yet
+
+// Get token from URL parameters
+const token = Astro.url.searchParams.get("token");
+const type = Astro.url.searchParams.get("type");
+
+// Simple mock check if it's a valid confirmation request
+const isValidConfirmation = token && type === "signup";
+
+// Normally we would process the confirmation here
+// For now, we just show a message and provide a link to login
+
+const pageTitle = isValidConfirmation ? "Email Confirmed" : "Confirmation Failed";
+---
+
+<AuthLayout title={pageTitle}>
+  <div class="text-center space-y-4">
+    {isValidConfirmation ? (
+      <>
+        <div class="flex justify-center">
+          <div class="rounded-full bg-green-100 dark:bg-green-900/30 p-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="size-8 text-green-600 dark:text-green-400"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-lg font-medium text-foreground">Email Successfully Confirmed</h3>
+        <p class="text-muted-foreground">
+          Your email address has been confirmed. You can now log in to your account.
+        </p>
+        <div class="pt-4">
+          <a
+            href="/auth/login"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
+          >
+            Go to Login
+          </a>
+        </div>
+      </>
+    ) : (
+      <>
+        <div class="flex justify-center">
+          <div class="rounded-full bg-amber-100 dark:bg-amber-900/30 p-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="size-8 text-amber-600 dark:text-amber-400"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
+        <h3 class="text-lg font-medium text-foreground">Confirmation Failed</h3>
+        <p class="text-muted-foreground">
+          The confirmation link is invalid or has expired. Please try signing up again.
+        </p>
+        <div class="pt-4">
+          <a
+            href="/auth/register"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
+          >
+            Register Again
+          </a>
+        </div>
+      </>
+    )}
+  </div>
+
+  <div slot="footer">
+    <p>© {new Date().getFullYear()} 10x Cards. All rights reserved.</p>
+  </div>
+</AuthLayout>
+
+

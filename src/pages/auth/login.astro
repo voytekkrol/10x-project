@@ -1,0 +1,30 @@
+---
+/**
+ * Login Page
+ *
+ * Renders the login form and handles redirect parameters
+ */
+
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import { LoginForm } from "../../components/auth/LoginForm";
+
+// Get redirect URL from query parameters
+const redirect = Astro.url.searchParams.get("redirect");
+
+// In a real implementation, we would check if user is already authenticated
+// and redirect to the appropriate page
+// But as per instructions, we're not implementing backend functionality yet
+const isAuthenticated = false;
+
+// If user is already authenticated, redirect
+if (isAuthenticated) {
+  return Astro.redirect("/generate");
+}
+---
+
+<AuthLayout title="Log In">
+  <LoginForm client:load redirectTo={redirect || undefined} />
+  <div slot="footer">
+    <p>© {new Date().getFullYear()} 10x Cards. All rights reserved.</p>
+  </div>
+</AuthLayout>
