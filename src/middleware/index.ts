@@ -6,9 +6,12 @@ const PUBLIC_PATHS = [
   "/auth/login",
   "/auth/register",
   "/auth/forgot-password",
-  "/auth/reset-password",
   "/auth/confirm",
 ];
+
+// Paths that should be accessible without redirecting authenticated users
+// These pages need auth context but shouldn't redirect to /generate
+const SEMI_PROTECTED_PATHS = ["/auth/reset-password"];
 
 export const onRequest = defineMiddleware(
   async ({ locals, cookies, url, request, redirect }, next) => {
@@ -33,16 +36,24 @@ export const onRequest = defineMiddleware(
       const { data: { user } } = await supabase.auth.getUser();
       locals.user = user;
       
-      // If user is authenticated and tries to access auth pages, redirect to /generate
+      // If user is authenticated and tries to access auth pages (except semi-protected),
+      // redirect to /generate
       if (PUBLIC_PATHS.includes(url.pathname)) {
         return redirect('/generate');
       }
+      
+      // Semi-protected paths are accessible with session, no redirect needed
     } else {
       // No session, so no user
       locals.user = null;
       
       // If accessing a protected route without authentication, redirect to login
-      if (!PUBLIC_PATHS.includes(url.pathname) && url.pathname !== '/') {
+      // Allow public paths and semi-protected paths (they handle their own logic)
+      const isAllowed = PUBLIC_PATHS.includes(url.pathname) || 
+                       SEMI_PROTECTED_PATHS.includes(url.pathname) ||
+                       url.pathname === '/';
+                       
+      if (!isAllowed) {
         // Save the attempted URL to redirect back after login
         return redirect(`/auth/login?redirect=${encodeURIComponent(url.pathname)}`);
       }

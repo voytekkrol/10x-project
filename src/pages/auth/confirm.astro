@@ -1,73 +1,45 @@
 ---
 /**
- * Email Confirmation Page
+ * Email Confirmation & Password Reset Page
  * 
- * Handles the callback for email verification
- * Verifies the token and redirects to login with success message
+ * Handles the callback for:
+ * - Email verification (signup confirmation)
+ * - Password reset token exchange
+ * 
+ * The token is in the URL hash (client-side), so we need to use client-side
+ * JavaScript to exchange it for a session, then redirect appropriately.
  */
 
 import AuthLayout from "../../layouts/AuthLayout.astro";
 
-// In a real implementation, we would verify the token from the URL
-// and confirm the user's email address via Supabase
-// But as per instructions, we're not implementing backend functionality yet
-
-// Get token from URL parameters
-const token = Astro.url.searchParams.get("token");
+// Get type from URL parameters to determine flow
 const type = Astro.url.searchParams.get("type");
+const error = Astro.url.searchParams.get("error");
+const errorDescription = Astro.url.searchParams.get("error_description");
 
-// Simple mock check if it's a valid confirmation request
-const isValidConfirmation = token && type === "signup";
+let pageTitle = "Confirming...";
+let showError = false;
+let errorMessage = "";
 
-// Normally we would process the confirmation here
-// For now, we just show a message and provide a link to login
-
-const pageTitle = isValidConfirmation ? "Email Confirmed" : "Confirmation Failed";
+// Handle errors from Supabase redirect
+if (error) {
+  showError = true;
+  pageTitle = "Confirmation Failed";
+  errorMessage = errorDescription || "The confirmation link is invalid or has expired.";
+}
 ---
 
 <AuthLayout title={pageTitle}>
-  <div class="text-center space-y-4">
-    {isValidConfirmation ? (
-      <>
+  <div id="confirmation-container" class="text-center space-y-4">
+    {showError ? (
+      <div class="space-y-4">
         <div class="flex justify-center">
-          <div class="rounded-full bg-green-100 dark:bg-green-900/30 p-3">
+          <div class="rounded-full bg-red-100 dark:bg-red-900/30 p-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              class="size-8 text-green-600 dark:text-green-400"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </div>
-        </div>
-        <h3 class="text-lg font-medium text-foreground">Email Successfully Confirmed</h3>
-        <p class="text-muted-foreground">
-          Your email address has been confirmed. You can now log in to your account.
-        </p>
-        <div class="pt-4">
-          <a
-            href="/auth/login"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
-          >
-            Go to Login
-          </a>
-        </div>
-      </>
-    ) : (
-      <>
-        <div class="flex justify-center">
-          <div class="rounded-full bg-amber-100 dark:bg-amber-900/30 p-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              class="size-8 text-amber-600 dark:text-amber-400"
+              class="size-8 text-red-600 dark:text-red-400"
               aria-hidden="true"
             >
               <path
@@ -79,18 +51,43 @@ const pageTitle = isValidConfirmation ? "Email Confirmed" : "Confirmation Failed
           </div>
         </div>
         <h3 class="text-lg font-medium text-foreground">Confirmation Failed</h3>
-        <p class="text-muted-foreground">
-          The confirmation link is invalid or has expired. Please try signing up again.
-        </p>
+        <p class="text-muted-foreground">{errorMessage}</p>
         <div class="pt-4">
           <a
-            href="/auth/register"
+            href="/auth/login"
             class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
           >
-            Register Again
+            Back to Login
           </a>
         </div>
-      </>
+      </div>
+    ) : (
+      <div class="space-y-4">
+        <div class="flex justify-center">
+          <svg
+            class="animate-spin h-12 w-12 text-primary"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-foreground">Confirming...</h3>
+        <p class="text-muted-foreground">Please wait while we verify your request.</p>
+      </div>
     )}
   </div>
 
@@ -98,6 +95,63 @@ const pageTitle = isValidConfirmation ? "Email Confirmed" : "Confirmation Failed
     <p>© {new Date().getFullYear()} 10x Cards. All rights reserved.</p>
   </div>
 </AuthLayout>
+
+<script>
+  import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
+
+  // This script runs on the client to handle the auth token from the URL hash
+  async function handleAuthCallback() {
+    try {
+      const supabase = getSupabaseBrowser();
+      
+      // Check if we have a hash with auth tokens
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const type = hashParams.get('type');
+      
+      console.log("[Confirm] Auth callback - Type:", type, "Has token:", !!accessToken);
+      
+      if (!accessToken) {
+        console.error("[Confirm] No access token found in URL hash");
+        window.location.href = "/auth/login?error=no_token";
+        return;
+      }
+
+      // Exchange the token for a session
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("[Confirm] Error getting session:", error);
+        window.location.href = `/auth/login?error=${encodeURIComponent(error.message)}`;
+        return;
+      }
+
+      console.log("[Confirm] Session obtained:", !!data.session);
+
+      // Determine where to redirect based on the type
+      if (type === 'recovery') {
+        // Password reset - redirect to reset password page
+        console.log("[Confirm] Password reset confirmed, redirecting to reset-password");
+        window.location.href = "/auth/reset-password";
+      } else if (type === 'signup' || type === 'email_confirmation') {
+        // Email confirmation - redirect to login with success message
+        console.log("[Confirm] Email confirmed, redirecting to login");
+        window.location.href = "/auth/login?confirmed=true";
+      } else {
+        // Unknown type, default to login
+        console.log("[Confirm] Unknown type, redirecting to login");
+        window.location.href = "/auth/login";
+      }
+    } catch (err) {
+      console.error("[Confirm] Unexpected error during auth callback:", err);
+      window.location.href = "/auth/login?error=unexpected_error";
+    }
+  }
+
+  // Run the callback handler when the page loads
+  handleAuthCallback();
+</script>
+
 
 
 

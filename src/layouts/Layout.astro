@@ -16,6 +16,9 @@ const { title = "10x Astro Starter" } = Astro.props;
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <script is:inline define:vars={{ SUPABASE_URL: import.meta.env.SUPABASE_URL, SUPABASE_KEY: import.meta.env.SUPABASE_KEY }}>
+      window.ENV = { SUPABASE_URL, SUPABASE_KEY };
+    </script>
   </head>
   <body>
     <slot />

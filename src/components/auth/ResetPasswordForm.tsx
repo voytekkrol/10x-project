@@ -7,6 +7,8 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
+import { ResetPasswordFormSchema } from "../../lib/validation/auth.schemas";
 
 export function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -21,61 +23,59 @@ export function ResetPasswordForm() {
     // Clear previous errors
     setError(null);
     
-    // Form validation (simple client-side checks)
-    if (!password) {
-      setError("Password is required");
-      return;
-    }
-    
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
-    
-    if (!hasUppercase(password)) {
-      setError("Password must contain at least one uppercase letter");
-      return;
-    }
-    
-    if (!hasLowercase(password)) {
-      setError("Password must contain at least one lowercase letter");
-      return;
-    }
-    
-    if (!hasDigit(password)) {
-      setError("Password must contain at least one number");
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setError("Passwords must match");
+    // Validate with Zod schema
+    const result = ResetPasswordFormSchema.safeParse({ password, confirmPassword });
+    if (!result.success) {
+      const fieldErrors = result.error.formErrors.fieldErrors;
+      const firstError = 
+        fieldErrors.password?.[0] || 
+        fieldErrors.confirmPassword?.[0] || 
+        "Invalid form data";
+      setError(firstError);
       return;
     }
 
     setIsLoading(true);
     
-    // Note: In a real implementation, this would read the token from URL hash
-    // and call supabase.auth.updateUser({ password })
-    // But as per instructions, we're not implementing backend functionality yet
-    
-    // Simulate loading state for UI demonstration purposes
-    setTimeout(() => {
+    try {
+      const supabase = getSupabaseBrowser();
+      
+      console.log("Updating user password...");
+      
+      // Update the user's password
+      // The session should already be established from the password reset link
+      const { data, error: updateError } = await supabase.auth.updateUser({
+        password: password,
+      });
+
+      if (updateError) {
+        console.error("Password update error:", updateError);
+        setError(updateError.message || "Failed to reset password. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!data.user) {
+        console.error("No user returned after password update");
+        setError("Session expired. Please request a new password reset link.");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Success!
+      console.log("Password updated successfully for user:", data.user.id);
       setIsLoading(false);
       setSuccess(true);
-    }, 1000);
-  };
-  
-  // Simple validation helpers
-  const hasUppercase = (str: string) => {
-    return /[A-Z]/.test(str);
-  };
-  
-  const hasLowercase = (str: string) => {
-    return /[a-z]/.test(str);
-  };
-  
-  const hasDigit = (str: string) => {
-    return /[0-9]/.test(str);
+      
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        window.location.href = "/auth/login";
+      }, 2000);
+    } catch (err) {
+      console.error("Unexpected error during password reset:", err);
+      setError("Connection error. Please check your internet and try again.");
+      setIsLoading(false);
+    }
   };
 
   // If password was reset successfully, show confirmation message

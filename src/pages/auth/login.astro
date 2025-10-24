@@ -8,8 +8,10 @@
 import AuthLayout from "../../layouts/AuthLayout.astro";
 import { LoginForm } from "../../components/auth/LoginForm";
 
-// Get redirect URL from query parameters
+// Get URL parameters
 const redirect = Astro.url.searchParams.get("redirect");
+const confirmed = Astro.url.searchParams.get("confirmed");
+const error = Astro.url.searchParams.get("error");
 
 // Check if user is already authenticated using session in context.locals
 // This is now handled by middleware, but we'll do an additional check here
@@ -17,24 +19,65 @@ if (Astro.locals.session) {
   return Astro.redirect(redirect || "/generate");
 }
 
-// Add environment variables for client-side components
-const SUPABASE_URL = import.meta.env.SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
+export const prerender = false;
 ---
 
-<script is:inline define:vars={{ SUPABASE_URL, SUPABASE_KEY }}>
-  // Set client-side environment variables
-  window.ENV = {
-    SUPABASE_URL,
-    SUPABASE_KEY,
-  };
-  console.log("[Login Page] Environment variables set:", {
-    hasUrl: !!window.ENV.SUPABASE_URL,
-    hasKey: !!window.ENV.SUPABASE_KEY,
-  });
-</script>
-
 <AuthLayout title="Log In">
+  {/* Success message for email confirmation */}
+  {
+    confirmed && (
+      <div class="mb-4 flex items-start gap-3 px-4 py-3 rounded-md bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="size-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-green-900 dark:text-green-100">Email Confirmed</p>
+          <p class="text-sm text-green-700 dark:text-green-300 mt-1">
+            Your email has been verified. You can now log in to your account.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  {/* Error message */}
+  {
+    error && (
+      <div class="mb-4 flex items-start gap-3 px-4 py-3 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="size-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <div class="flex-1">
+          <p class="text-sm text-amber-700 dark:text-amber-300">
+            {error === "no_token" && "Invalid confirmation link."}
+            {error === "session_expired" && "Your session has expired. Please log in."}
+            {error !== "no_token" && error !== "session_expired" && "An error occurred. Please try again."}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   <LoginForm client:load redirectTo={redirect || undefined} />
   <div slot="footer">
     <p>© {new Date().getFullYear()} 10x Cards. All rights reserved.</p>

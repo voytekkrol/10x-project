@@ -24,6 +24,9 @@ const { title, description } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title} - 10x Cards</title>
     <meta name="description" content={description || `${title} - 10x Cards Authentication`} />
+    <script is:inline define:vars={{ SUPABASE_URL: import.meta.env.SUPABASE_URL, SUPABASE_KEY: import.meta.env.SUPABASE_KEY }}>
+      window.ENV = { SUPABASE_URL, SUPABASE_KEY };
+    </script>
   </head>
   <body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
     <div class="container max-w-md mx-auto px-4 py-16">

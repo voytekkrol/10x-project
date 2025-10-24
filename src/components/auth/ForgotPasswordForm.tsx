@@ -7,6 +7,8 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
+import { EmailSchema } from "../../lib/validation/auth.schemas";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -20,32 +22,44 @@ export function ForgotPasswordForm() {
     // Clear previous states
     setError(null);
     
-    // Form validation (simple client-side check)
-    if (!email.trim()) {
-      setError("Email is required");
-      return;
-    }
-    
-    if (!isValidEmail(email)) {
-      setError("Please enter a valid email address");
+    // Validate email with Zod schema
+    const result = EmailSchema.safeParse(email);
+    if (!result.success) {
+      setError(result.error.errors[0].message);
       return;
     }
 
     setIsLoading(true);
     
-    // Note: In a real implementation, this would call supabase.auth.resetPasswordForEmail()
-    // But as per instructions, we're not implementing backend functionality yet
-    
-    // Simulate loading state for UI demonstration purposes
-    setTimeout(() => {
+    try {
+      const supabase = getSupabaseBrowser();
+      
+      // Get the current origin for the redirect URL
+      const redirectTo = `${window.location.origin}/auth/confirm`;
+      
+      console.log("Sending password reset email to:", email);
+      console.log("Redirect URL:", redirectTo);
+      
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      });
+
+      if (resetError) {
+        console.error("Password reset error:", resetError);
+        setError(resetError.message || "Failed to send reset email. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Success! Show confirmation message
+      console.log("Password reset email sent successfully");
       setIsLoading(false);
       setSuccess(true);
-    }, 1000);
-  };
-  
-  // Simple email validation
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    } catch (err) {
+      console.error("Unexpected error during password reset:", err);
+      setError("Connection error. Please check your internet and try again.");
+      setIsLoading(false);
+    }
   };
 
   // If reset email was sent, show confirmation message
