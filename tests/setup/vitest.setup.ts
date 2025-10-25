@@ -3,7 +3,7 @@ import { cleanup } from "@testing-library/react";
 import { server } from "../mocks/server";
 
 // Extend Vitest's expect method with methods from @testing-library/jest-dom
-import "@testing-library/jest-dom/vitest";
+import "@testing-library/jest-dom";
 
 // Start the MSW server before all tests
 beforeAll(() => {

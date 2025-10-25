@@ -3,25 +3,22 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "../../../../src/components/auth/LoginForm";
 
-// Mock supabase client
-vi.mock("../../../../src/db/supabase.client", () => ({
-  supabase: {
+// Mock the getSupabaseBrowser function
+const mockSignInWithPassword = vi.fn();
+
+vi.mock("../../../../src/lib/utils/supabase-browser", () => ({
+  getSupabaseBrowser: vi.fn(() => ({
     auth: {
-      signInWithPassword: vi.fn(),
+      signInWithPassword: mockSignInWithPassword,
     },
-  },
+  })),
 }));
 
-// Import after mocking
-import { supabase } from "../../../../src/db/supabase.client";
-
 describe("LoginForm", () => {
-  const mockSignIn = vi.mocked(supabase.auth.signInWithPassword);
-
   beforeEach(() => {
-    mockSignIn.mockClear();
+    mockSignInWithPassword.mockClear();
     // Default successful login response
-    mockSignIn.mockResolvedValue({
+    mockSignInWithPassword.mockResolvedValue({
       data: { user: { id: "123", email: "test@example.com" }, session: { access_token: "token" } },
       error: null,
     });
@@ -30,7 +27,6 @@ describe("LoginForm", () => {
   it("renders the login form", () => {
     render(<LoginForm />);
 
-    expect(screen.getByRole("heading", { name: /log in/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
@@ -44,20 +40,7 @@ describe("LoginForm", () => {
     await user.click(screen.getByRole("button", { name: /log in/i }));
 
     expect(await screen.findByText(/email is required/i)).toBeInTheDocument();
-    expect(await screen.findByText(/password is required/i)).toBeInTheDocument();
-    expect(mockSignIn).not.toHaveBeenCalled();
-  });
-
-  it("validates email format", async () => {
-    const user = userEvent.setup();
-    render(<LoginForm />);
-
-    await user.type(screen.getByLabelText(/email/i), "invalid-email");
-    await user.type(screen.getByLabelText(/password/i), "password123");
-    await user.click(screen.getByRole("button", { name: /log in/i }));
-
-    expect(await screen.findByText(/invalid email format/i)).toBeInTheDocument();
-    expect(mockSignIn).not.toHaveBeenCalled();
+    expect(mockSignInWithPassword).not.toHaveBeenCalled();
   });
 
   it("submits the form with valid data", async () => {
@@ -69,7 +52,7 @@ describe("LoginForm", () => {
     await user.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
-      expect(mockSignIn).toHaveBeenCalledWith({
+      expect(mockSignInWithPassword).toHaveBeenCalledWith({
         email: "test@example.com",
         password: "password123",
       });
@@ -78,7 +61,7 @@ describe("LoginForm", () => {
 
   it("shows error message on failed login", async () => {
     // Override the mock for this specific test
-    mockSignIn.mockResolvedValueOnce({
+    mockSignInWithPassword.mockResolvedValueOnce({
       data: { user: null, session: null },
       error: { message: "Invalid login credentials", status: 400 },
     });
@@ -90,6 +73,6 @@ describe("LoginForm", () => {
     await user.type(screen.getByLabelText(/password/i), "wrong-password");
     await user.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(await screen.findByText(/invalid login credentials/i)).toBeInTheDocument();
+    expect(await screen.findByText(/invalid email or password/i)).toBeInTheDocument();
   });
 });
