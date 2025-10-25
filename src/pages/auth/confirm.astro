@@ -1,11 +1,11 @@
 ---
 /**
  * Email Confirmation & Password Reset Page
- * 
+ *
  * Handles the callback for:
  * - Email verification (signup confirmation)
  * - Password reset token exchange
- * 
+ *
  * The token is in the URL hash (client-side), so we need to use client-side
  * JavaScript to exchange it for a session, then redirect appropriately.
  */
@@ -31,64 +31,59 @@ if (error) {
 
 <AuthLayout title={pageTitle}>
   <div id="confirmation-container" class="text-center space-y-4">
-    {showError ? (
-      <div class="space-y-4">
-        <div class="flex justify-center">
-          <div class="rounded-full bg-red-100 dark:bg-red-900/30 p-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              class="size-8 text-red-600 dark:text-red-400"
-              aria-hidden="true"
+    {
+      showError ? (
+        <div class="space-y-4">
+          <div class="flex justify-center">
+            <div class="rounded-full bg-red-100 dark:bg-red-900/30 p-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-8 text-red-600 dark:text-red-400"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-medium text-foreground">Confirmation Failed</h3>
+          <p class="text-muted-foreground">{errorMessage}</p>
+          <div class="pt-4">
+            <a
+              href="/auth/login"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
             >
+              Back to Login
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div class="space-y-4">
+          <div class="flex justify-center">
+            <svg
+              class="animate-spin h-12 w-12 text-primary"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
               <path
-                fill-rule="evenodd"
-                d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                clip-rule="evenodd"
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
           </div>
+          <h3 class="text-lg font-medium text-foreground">Confirming...</h3>
+          <p class="text-muted-foreground">Please wait while we verify your request.</p>
         </div>
-        <h3 class="text-lg font-medium text-foreground">Confirmation Failed</h3>
-        <p class="text-muted-foreground">{errorMessage}</p>
-        <div class="pt-4">
-          <a
-            href="/auth/login"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90"
-          >
-            Back to Login
-          </a>
-        </div>
-      </div>
-    ) : (
-      <div class="space-y-4">
-        <div class="flex justify-center">
-          <svg
-            class="animate-spin h-12 w-12 text-primary"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-        </div>
-        <h3 class="text-lg font-medium text-foreground">Confirming...</h3>
-        <p class="text-muted-foreground">Please wait while we verify your request.</p>
-      </div>
-    )}
+      )
+    }
   </div>
 
   <div slot="footer">
@@ -103,14 +98,14 @@ if (error) {
   async function handleAuthCallback() {
     try {
       const supabase = getSupabaseBrowser();
-      
+
       // Check if we have a hash with auth tokens
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const type = hashParams.get('type');
-      
+      const accessToken = hashParams.get("access_token");
+      const type = hashParams.get("type");
+
       console.log("[Confirm] Auth callback - Type:", type, "Has token:", !!accessToken);
-      
+
       if (!accessToken) {
         console.error("[Confirm] No access token found in URL hash");
         window.location.href = "/auth/login?error=no_token";
@@ -119,7 +114,7 @@ if (error) {
 
       // Exchange the token for a session
       const { data, error } = await supabase.auth.getSession();
-      
+
       if (error) {
         console.error("[Confirm] Error getting session:", error);
         window.location.href = `/auth/login?error=${encodeURIComponent(error.message)}`;
@@ -129,11 +124,11 @@ if (error) {
       console.log("[Confirm] Session obtained:", !!data.session);
 
       // Determine where to redirect based on the type
-      if (type === 'recovery') {
+      if (type === "recovery") {
         // Password reset - redirect to reset password page
         console.log("[Confirm] Password reset confirmed, redirecting to reset-password");
         window.location.href = "/auth/reset-password";
-      } else if (type === 'signup' || type === 'email_confirmation') {
+      } else if (type === "signup" || type === "email_confirmation") {
         // Email confirmation - redirect to login with success message
         console.log("[Confirm] Email confirmed, redirecting to login");
         window.location.href = "/auth/login?confirmed=true";
@@ -151,7 +146,3 @@ if (error) {
   // Run the callback handler when the page loads
   handleAuthCallback();
 </script>
-
-
-
-

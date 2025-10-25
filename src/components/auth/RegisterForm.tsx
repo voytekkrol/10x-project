@@ -1,6 +1,6 @@
 /**
  * Register Form Component
- * 
+ *
  * Registration form with email, password, confirmation and validation
  */
 
@@ -21,40 +21,37 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous states
     setError(null);
     setSuccess(false);
-    
+
     // Use zod schema for validation
     const result = RegisterFormSchema.safeParse({ email, password, confirmPassword });
     if (!result.success) {
       // Get the first validation error
       const fieldErrors = result.error.formErrors.fieldErrors;
-      const firstError = 
-        fieldErrors.email?.[0] || 
-        fieldErrors.password?.[0] || 
-        fieldErrors.confirmPassword?.[0] ||
-        "Invalid form data";
+      const firstError =
+        fieldErrors.email?.[0] || fieldErrors.password?.[0] || fieldErrors.confirmPassword?.[0] || "Invalid form data";
       setError(firstError);
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const supabase = getSupabaseBrowser();
       console.log("Attempting to register with:", { email });
-      
+
       const { data, error: supabaseError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      console.log("Sign up response:", { 
-        success: !supabaseError, 
+      console.log("Sign up response:", {
+        success: !supabaseError,
         hasUser: !!data?.user,
-        error: supabaseError ? supabaseError.message : null
+        error: supabaseError ? supabaseError.message : null,
       });
 
       if (supabaseError) {
@@ -63,7 +60,7 @@ export function RegisterForm() {
         setIsLoading(false);
         return;
       }
-      
+
       // Success! Show confirmation message
       if (data.user) {
         console.log("Registration successful, showing confirmation message");
@@ -106,9 +103,7 @@ export function RegisterForm() {
           <p>
             We've sent a confirmation link to <strong className="text-foreground">{email}</strong>
           </p>
-          <p>
-            Please check your email and click the link to activate your account before logging in.
-          </p>
+          <p>Please check your email and click the link to activate your account before logging in.</p>
         </div>
         <Button asChild className="mt-4">
           <a href="/auth/login">Go to Login</a>
@@ -194,7 +189,7 @@ export function RegisterForm() {
             Password must be at least 8 characters and include uppercase, lowercase, and numbers.
           </p>
         </div>
-        
+
         {/* Confirm Password field */}
         <div className="space-y-2">
           <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -218,11 +213,7 @@ export function RegisterForm() {
         </div>
 
         {/* Submit button */}
-        <Button 
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
               <svg
@@ -231,14 +222,7 @@ export function RegisterForm() {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -263,4 +247,3 @@ export function RegisterForm() {
     </div>
   );
 }
-

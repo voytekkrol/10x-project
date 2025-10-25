@@ -1,6 +1,6 @@
 /**
  * Login Form Component
- * 
+ *
  * Email/password form with validation and error display
  */
 
@@ -23,38 +23,35 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous errors
     setError(null);
-    
+
     // Use zod schema for validation
     const result = LoginFormSchema.safeParse({ email, password });
     if (!result.success) {
       // Get the first validation error
       const fieldErrors = result.error.formErrors.fieldErrors;
-      const firstError = 
-        fieldErrors.email?.[0] || 
-        fieldErrors.password?.[0] || 
-        "Invalid form data";
+      const firstError = fieldErrors.email?.[0] || fieldErrors.password?.[0] || "Invalid form data";
       setError(firstError);
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const supabase = getSupabaseBrowser();
       console.log("Attempting to sign in with:", { email });
-      
+
       const { data, error: supabaseError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log("Sign in response:", { 
-        success: !supabaseError, 
+      console.log("Sign in response:", {
+        success: !supabaseError,
         hasSession: !!data?.session,
-        error: supabaseError ? supabaseError.message : null
+        error: supabaseError ? supabaseError.message : null,
       });
 
       if (supabaseError) {
@@ -63,11 +60,11 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         setIsLoading(false);
         return;
       }
-      
+
       // Success! Redirect to the appropriate page
       if (data.session) {
         console.log("Login successful, redirecting to:", redirectTo || "/generate");
-        
+
         // Add a small delay before redirecting to ensure cookies are set
         setTimeout(() => {
           window.location.href = redirectTo || "/generate";
@@ -165,11 +162,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         </div>
 
         {/* Submit button */}
-        <Button 
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
               <svg
@@ -178,14 +171,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -213,4 +199,3 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     </div>
   );
 }
-

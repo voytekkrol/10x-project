@@ -26,6 +26,16 @@ The application addresses the challenge of time-consuming manual flashcard creat
 ### AI Integration
 - **Openrouter.ai** - Access to multiple LLM providers (OpenAI, Anthropic, Google, etc.) with cost controls and API key limits
 
+### Testing
+- **Unit Testing**: 
+  - **Vitest** - Fast testing framework compatible with Jest API
+  - **React Testing Library** - Component testing with user-centric approach
+  - **MSW** - Mock Service Worker for API mocking
+- **E2E Testing**: 
+  - **Playwright** - End-to-end testing across multiple browsers (Chrome, Firefox, Safari)
+  - **Axe-core** - Accessibility testing
+  - **Lighthouse CI** - Performance auditing
+
 ### CI/CD & Hosting
 - **GitHub Actions** - CI/CD pipelines
 - **DigitalOcean** - Application hosting with Docker

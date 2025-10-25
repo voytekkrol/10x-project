@@ -1,6 +1,6 @@
 /**
  * Reset Password Form Component
- * 
+ *
  * Form for setting a new password with confirmation and validation
  */
 
@@ -19,29 +19,26 @@ export function ResetPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous errors
     setError(null);
-    
+
     // Validate with Zod schema
     const result = ResetPasswordFormSchema.safeParse({ password, confirmPassword });
     if (!result.success) {
       const fieldErrors = result.error.formErrors.fieldErrors;
-      const firstError = 
-        fieldErrors.password?.[0] || 
-        fieldErrors.confirmPassword?.[0] || 
-        "Invalid form data";
+      const firstError = fieldErrors.password?.[0] || fieldErrors.confirmPassword?.[0] || "Invalid form data";
       setError(firstError);
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const supabase = getSupabaseBrowser();
-      
+
       console.log("Updating user password...");
-      
+
       // Update the user's password
       // The session should already be established from the password reset link
       const { data, error: updateError } = await supabase.auth.updateUser({
@@ -54,19 +51,19 @@ export function ResetPasswordForm() {
         setIsLoading(false);
         return;
       }
-      
+
       if (!data.user) {
         console.error("No user returned after password update");
         setError("Session expired. Please request a new password reset link.");
         setIsLoading(false);
         return;
       }
-      
+
       // Success!
       console.log("Password updated successfully for user:", data.user.id);
       setIsLoading(false);
       setSuccess(true);
-      
+
       // Redirect to login after a short delay
       setTimeout(() => {
         window.location.href = "/auth/login";
@@ -137,10 +134,8 @@ export function ResetPasswordForm() {
           </div>
         </div>
       )}
-      
-      <p className="text-sm text-muted-foreground">
-        Enter your new password below to reset your account password.
-      </p>
+
+      <p className="text-sm text-muted-foreground">Enter your new password below to reset your account password.</p>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -169,7 +164,7 @@ export function ResetPasswordForm() {
             Password must be at least 8 characters and include uppercase, lowercase, and numbers.
           </p>
         </div>
-        
+
         {/* Confirm Password field */}
         <div className="space-y-2">
           <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -193,11 +188,7 @@ export function ResetPasswordForm() {
         </div>
 
         {/* Submit button */}
-        <Button 
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
               <svg
@@ -206,14 +197,7 @@ export function ResetPasswordForm() {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -226,7 +210,7 @@ export function ResetPasswordForm() {
             "Reset Password"
           )}
         </Button>
-        
+
         {/* Login link */}
         <p className="text-sm text-center text-muted-foreground">
           Remembered your password?{" "}
@@ -238,4 +222,3 @@ export function ResetPasswordForm() {
     </div>
   );
 }
-

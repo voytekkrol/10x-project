@@ -61,4 +61,3 @@ export class InvalidApiKeyError extends Error {
     Object.setPrototypeOf(this, InvalidApiKeyError.prototype);
   }
 }
-

@@ -21,12 +21,7 @@ import type {
   OpenRouterApiResponse,
 } from "../types/openrouter.types";
 
-import {
-  OpenRouterError,
-  StructuredOutputError,
-  TimeoutError,
-  InvalidApiKeyError,
-} from "../utils/openrouter-errors";
+import { OpenRouterError, StructuredOutputError, TimeoutError, InvalidApiKeyError } from "../utils/openrouter-errors";
 
 import {
   AuthenticationError,
@@ -69,7 +64,7 @@ export class OpenRouterService {
 
     // Build headers
     this.headers = {
-      "Authorization": `Bearer ${this.apiKey}`,
+      Authorization: `Bearer ${this.apiKey}`,
       "Content-Type": "application/json",
     };
 
@@ -93,9 +88,7 @@ export class OpenRouterService {
    * @throws {TimeoutError} If request times out
    * @throws {OpenRouterError} For other API errors
    */
-  async createChatCompletion<T = unknown>(
-    params: ChatCompletionParams<T>
-  ): Promise<ChatCompletionResponse<T>> {
+  async createChatCompletion<T = unknown>(params: ChatCompletionParams<T>): Promise<ChatCompletionResponse<T>> {
     const startTime = Date.now();
 
     // Validate parameters
@@ -150,9 +143,7 @@ export class OpenRouterService {
 
     for (const message of messages) {
       if (!message.role || !["system", "user", "assistant"].includes(message.role)) {
-        throw new ValidationError(
-          `Invalid message role: ${message.role}. Must be "system", "user", or "assistant"`
-        );
+        throw new ValidationError(`Invalid message role: ${message.role}. Must be "system", "user", or "assistant"`);
       }
 
       if (!message.content || typeof message.content !== "string") {
@@ -258,9 +249,7 @@ export class OpenRouterService {
    * @throws {NetworkError} If network request fails
    * @throws Various API errors based on response
    */
-  private async executeRequest(
-    requestBody: OpenRouterRequestBody
-  ): Promise<OpenRouterApiResponse> {
+  private async executeRequest(requestBody: OpenRouterRequestBody): Promise<OpenRouterApiResponse> {
     let lastError: Error | undefined;
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
@@ -284,26 +273,19 @@ export class OpenRouterService {
         }
 
         // Parse and return successful response
-        const data = await response.json() as OpenRouterApiResponse;
+        const data = (await response.json()) as OpenRouterApiResponse;
         return data;
-
       } catch (error) {
         // Handle abort/timeout
         if (error instanceof Error && error.name === "AbortError") {
-          lastError = new TimeoutError(
-            `Request timed out after ${this.timeoutMs}ms`,
-            this.timeoutMs
-          );
+          lastError = new TimeoutError(`Request timed out after ${this.timeoutMs}ms`, this.timeoutMs);
         }
         // Handle network errors
         else if (error instanceof TypeError && error.message.includes("fetch")) {
           lastError = new NetworkError("Unable to connect to OpenRouter API");
         }
         // Re-throw non-retryable errors immediately
-        else if (
-          error instanceof AuthenticationError ||
-          error instanceof ValidationError
-        ) {
+        else if (error instanceof AuthenticationError || error instanceof ValidationError) {
           throw error;
         }
         // Store other errors for retry
@@ -324,9 +306,7 @@ export class OpenRouterService {
 
         // Calculate backoff delay
         const retryAfter =
-          lastError instanceof RateLimitError
-            ? lastError.retryAfter * 1000
-            : this.retryDelayMs * Math.pow(2, attempt);
+          lastError instanceof RateLimitError ? lastError.retryAfter * 1000 : this.retryDelayMs * Math.pow(2, attempt);
 
         // Wait before retry
         await new Promise((resolve) => setTimeout(resolve, retryAfter));
@@ -364,10 +344,7 @@ export class OpenRouterService {
 
       case 429: {
         const retryAfter = parseInt(response.headers.get("Retry-After") || "60", 10);
-        throw new RateLimitError(
-          errorMessage || "Rate limit exceeded",
-          retryAfter
-        );
+        throw new RateLimitError(errorMessage || "Rate limit exceeded", retryAfter);
       }
 
       case 503:
@@ -377,12 +354,7 @@ export class OpenRouterService {
         throw new ValidationError(errorMessage || "Invalid request parameters");
 
       case 404:
-        throw new OpenRouterError(
-          errorMessage || "Model not found",
-          404,
-          model,
-          requestId
-        );
+        throw new OpenRouterError(errorMessage || "Model not found", 404, model, requestId);
 
       default:
         throw new OpenRouterError(errorMessage, response.status, model, requestId);
@@ -418,11 +390,7 @@ export class OpenRouterService {
       try {
         content = JSON.parse(rawContent) as T;
       } catch (error) {
-        throw new StructuredOutputError(
-          "Failed to parse structured JSON output from AI response",
-          rawContent,
-          {}
-        );
+        throw new StructuredOutputError("Failed to parse structured JSON output from AI response", rawContent, {});
       }
     }
 
@@ -467,4 +435,3 @@ export class OpenRouterService {
     return data;
   }
 }
-

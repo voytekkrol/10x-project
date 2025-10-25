@@ -19,10 +19,10 @@ export interface AIGenerationResult {
  * Flashcard output schema for structured JSON generation
  */
 interface FlashcardOutput {
-  flashcards: Array<{
+  flashcards: {
     front: string;
     back: string;
-  }>;
+  }[];
 }
 
 /**

@@ -72,7 +72,10 @@ async function testAIFlashcard() {
 
   // First, create a generation
   console.log("Creating generation...");
-  const sourceText = "TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale. ".repeat(10);
+  const sourceText =
+    "TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale. ".repeat(
+      10
+    );
 
   const genResponse = await apiRequest("/generations", "POST", {
     source_text: sourceText,
@@ -290,7 +293,7 @@ async function runTests() {
   try {
     await testManualFlashcard();
     const aiResult = await testAIFlashcard();
-    
+
     if (aiResult) {
       await testBatchAIFlashcards(aiResult.generationId);
     }
@@ -309,4 +312,3 @@ async function runTests() {
 
 // Run tests
 runTests();
-

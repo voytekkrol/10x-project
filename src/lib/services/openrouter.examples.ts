@@ -1,12 +1,12 @@
 /**
  * OpenRouter Service Usage Examples
- * 
+ *
  * This file contains practical examples of using the OpenRouter service
  * for various use cases. These are examples only - not meant to be imported.
  */
 
-import { OpenRouterService } from './openrouter.service';
-import type { ResponseFormat } from '../types/openrouter.types';
+import { OpenRouterService } from "./openrouter.service";
+import type { ResponseFormat } from "../types/openrouter.types";
 
 // =============================================================================
 // Example 1: Simple Text Generation
@@ -15,13 +15,13 @@ import type { ResponseFormat } from '../types/openrouter.types';
 async function example1_SimpleTextGeneration() {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-3.5-turbo',
+    defaultModel: "openai/gpt-3.5-turbo",
   });
 
   const response = await openRouter.createChatCompletion({
     messages: [
-      { role: 'system', content: 'You are a helpful assistant.' },
-      { role: 'user', content: 'Explain what TypeScript is in 2-3 sentences.' },
+      { role: "system", content: "You are a helpful assistant." },
+      { role: "user", content: "Explain what TypeScript is in 2-3 sentences." },
     ],
     temperature: 0.7,
     maxTokens: 150,
@@ -36,45 +36,45 @@ async function example1_SimpleTextGeneration() {
 // =============================================================================
 
 interface FlashcardOutput {
-  flashcards: Array<{
+  flashcards: {
     front: string;
     back: string;
-    difficulty: 'easy' | 'medium' | 'hard';
-  }>;
+    difficulty: "easy" | "medium" | "hard";
+  }[];
 }
 
 async function example2_FlashcardGeneration(sourceText: string) {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-4-turbo',
+    defaultModel: "openai/gpt-4-turbo",
   });
 
   const schema: ResponseFormat = {
-    type: 'json_schema',
+    type: "json_schema",
     json_schema: {
-      name: 'flashcard_generation',
+      name: "flashcard_generation",
       strict: true,
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
           flashcards: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
-                front: { type: 'string' },
-                back: { type: 'string' },
+                front: { type: "string" },
+                back: { type: "string" },
                 difficulty: {
-                  type: 'string',
-                  enum: ['easy', 'medium', 'hard'],
+                  type: "string",
+                  enum: ["easy", "medium", "hard"],
                 },
               },
-              required: ['front', 'back', 'difficulty'],
+              required: ["front", "back", "difficulty"],
               additionalProperties: false,
             },
           },
         },
-        required: ['flashcards'],
+        required: ["flashcards"],
         additionalProperties: false,
       },
     },
@@ -83,11 +83,11 @@ async function example2_FlashcardGeneration(sourceText: string) {
   const response = await openRouter.createChatCompletion<FlashcardOutput>({
     messages: [
       {
-        role: 'system',
+        role: "system",
         content: `Create educational flashcards from the provided text. 
 Generate 5 flashcards with varying difficulty levels.`,
       },
-      { role: 'user', content: sourceText },
+      { role: "user", content: sourceText },
     ],
     temperature: 0.7,
     maxTokens: 2000,
@@ -102,53 +102,53 @@ Generate 5 flashcards with varying difficulty levels.`,
 // =============================================================================
 
 interface QuizOutput {
-  questions: Array<{
+  questions: {
     question: string;
     options: string[];
     correctIndex: number;
     explanation: string;
-  }>;
+  }[];
 }
 
 async function example3_QuizGeneration(topic: string) {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-4-turbo',
+    defaultModel: "openai/gpt-4-turbo",
   });
 
   const schema: ResponseFormat = {
-    type: 'json_schema',
+    type: "json_schema",
     json_schema: {
-      name: 'quiz_generation',
+      name: "quiz_generation",
       strict: true,
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
           questions: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
-                question: { type: 'string' },
+                question: { type: "string" },
                 options: {
-                  type: 'array',
-                  items: { type: 'string' },
+                  type: "array",
+                  items: { type: "string" },
                   minItems: 4,
                   maxItems: 4,
                 },
                 correctIndex: {
-                  type: 'number',
+                  type: "number",
                   minimum: 0,
                   maximum: 3,
                 },
-                explanation: { type: 'string' },
+                explanation: { type: "string" },
               },
-              required: ['question', 'options', 'correctIndex', 'explanation'],
+              required: ["question", "options", "correctIndex", "explanation"],
               additionalProperties: false,
             },
           },
         },
-        required: ['questions'],
+        required: ["questions"],
         additionalProperties: false,
       },
     },
@@ -157,10 +157,10 @@ async function example3_QuizGeneration(topic: string) {
   const response = await openRouter.createChatCompletion<QuizOutput>({
     messages: [
       {
-        role: 'system',
-        content: 'Create multiple choice quiz questions. Each question should have 4 options.',
+        role: "system",
+        content: "Create multiple choice quiz questions. Each question should have 4 options.",
       },
-      { role: 'user', content: `Create 3 quiz questions about: ${topic}` },
+      { role: "user", content: `Create 3 quiz questions about: ${topic}` },
     ],
     responseFormat: schema,
   });
@@ -178,28 +178,28 @@ interface SummaryOutput {
   wordCount: number;
 }
 
-async function example4_TextSummarization(text: string, maxWords: number = 100) {
+async function example4_TextSummarization(text: string, maxWords = 100) {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-4-turbo',
+    defaultModel: "openai/gpt-4-turbo",
   });
 
   const schema: ResponseFormat = {
-    type: 'json_schema',
+    type: "json_schema",
     json_schema: {
-      name: 'text_summary',
+      name: "text_summary",
       strict: true,
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
-          summary: { type: 'string' },
+          summary: { type: "string" },
           keyPoints: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
           },
-          wordCount: { type: 'number' },
+          wordCount: { type: "number" },
         },
-        required: ['summary', 'keyPoints', 'wordCount'],
+        required: ["summary", "keyPoints", "wordCount"],
         additionalProperties: false,
       },
     },
@@ -208,11 +208,11 @@ async function example4_TextSummarization(text: string, maxWords: number = 100) 
   const response = await openRouter.createChatCompletion<SummaryOutput>({
     messages: [
       {
-        role: 'system',
+        role: "system",
         content: `Summarize the provided text in ${maxWords} words or less. 
 Also extract 3-5 key points.`,
       },
-      { role: 'user', content: text },
+      { role: "user", content: text },
     ],
     temperature: 0.5,
     maxTokens: 1000,
@@ -229,20 +229,20 @@ Also extract 3-5 key points.`,
 async function example5_ContentEnhancement(originalText: string) {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-4-turbo',
+    defaultModel: "openai/gpt-4-turbo",
   });
 
   const response = await openRouter.createChatCompletion({
     messages: [
       {
-        role: 'system',
+        role: "system",
         content: `You are an expert editor. Improve the provided text by:
 1. Fixing grammar and spelling
 2. Enhancing clarity and readability
 3. Maintaining the original meaning
 4. Using more precise vocabulary`,
       },
-      { role: 'user', content: originalText },
+      { role: "user", content: originalText },
     ],
     temperature: 0.3, // Lower temperature for more consistent output
     maxTokens: 1500,
@@ -258,7 +258,7 @@ async function example5_ContentEnhancement(originalText: string) {
 async function example6_ErrorHandlingWithRetry() {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-3.5-turbo',
+    defaultModel: "openai/gpt-3.5-turbo",
     maxRetries: 3,
     retryDelayMs: 1000,
     timeoutMs: 30000,
@@ -270,25 +270,22 @@ async function example6_ErrorHandlingWithRetry() {
   while (attempt < maxAttempts) {
     try {
       const response = await openRouter.createChatCompletion({
-        messages: [
-          { role: 'user', content: 'Hello!' },
-        ],
+        messages: [{ role: "user", content: "Hello!" }],
       });
 
-      console.log('Success:', response.content);
+      console.log("Success:", response.content);
       return response;
-
     } catch (error) {
       attempt++;
       console.error(`Attempt ${attempt} failed:`, error);
 
       if (attempt >= maxAttempts) {
-        console.error('Max attempts reached. Giving up.');
+        console.error("Max attempts reached. Giving up.");
         throw error;
       }
 
       // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 }
@@ -300,7 +297,7 @@ async function example6_ErrorHandlingWithRetry() {
 async function example7_BatchProcessing(texts: string[]) {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-3.5-turbo',
+    defaultModel: "openai/gpt-3.5-turbo",
   });
 
   const results = [];
@@ -309,14 +306,14 @@ async function example7_BatchProcessing(texts: string[]) {
 
   for (let i = 0; i < texts.length; i += batchSize) {
     const batch = texts.slice(i, i + batchSize);
-    
+
     console.log(`Processing batch ${Math.floor(i / batchSize) + 1}...`);
-    
-    const batchPromises = batch.map(text =>
+
+    const batchPromises = batch.map((text) =>
       openRouter.createChatCompletion({
         messages: [
-          { role: 'system', content: 'Summarize the text in one sentence.' },
-          { role: 'user', content: text },
+          { role: "system", content: "Summarize the text in one sentence." },
+          { role: "user", content: text },
         ],
         maxTokens: 100,
       })
@@ -327,7 +324,7 @@ async function example7_BatchProcessing(texts: string[]) {
 
     // Wait between batches to avoid rate limits
     if (i + batchSize < texts.length) {
-      await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+      await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
     }
   }
 
@@ -341,12 +338,12 @@ async function example7_BatchProcessing(texts: string[]) {
 async function example8_MultiTurnConversation() {
   const openRouter = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY,
-    defaultModel: 'openai/gpt-4-turbo',
+    defaultModel: "openai/gpt-4-turbo",
   });
 
   const conversationHistory = [
-    { role: 'system' as const, content: 'You are a helpful math tutor.' },
-    { role: 'user' as const, content: 'What is calculus?' },
+    { role: "system" as const, content: "You are a helpful math tutor." },
+    { role: "user" as const, content: "What is calculus?" },
   ];
 
   // First response
@@ -354,20 +351,20 @@ async function example8_MultiTurnConversation() {
     messages: conversationHistory,
   });
 
-  console.log('AI:', response.content);
-  conversationHistory.push({ role: 'assistant', content: response.content as string });
+  console.log("AI:", response.content);
+  conversationHistory.push({ role: "assistant", content: response.content as string });
 
   // Continue conversation
   conversationHistory.push({
-    role: 'user',
-    content: 'Can you give me a simple example?',
+    role: "user",
+    content: "Can you give me a simple example?",
   });
 
   response = await openRouter.createChatCompletion({
     messages: conversationHistory,
   });
 
-  console.log('AI:', response.content);
+  console.log("AI:", response.content);
   return conversationHistory;
 }
 
@@ -376,11 +373,7 @@ async function example8_MultiTurnConversation() {
 // =============================================================================
 
 async function example9_ModelComparison(prompt: string) {
-  const models = [
-    'openai/gpt-3.5-turbo',
-    'openai/gpt-4-turbo',
-    'anthropic/claude-3-sonnet',
-  ];
+  const models = ["openai/gpt-3.5-turbo", "openai/gpt-4-turbo", "anthropic/claude-3-sonnet"];
 
   const results = await Promise.all(
     models.map(async (model) => {
@@ -391,7 +384,7 @@ async function example9_ModelComparison(prompt: string) {
 
       const startTime = Date.now();
       const response = await openRouter.createChatCompletion({
-        messages: [{ role: 'user', content: prompt }],
+        messages: [{ role: "user", content: prompt }],
         maxTokens: 150,
       });
 
@@ -415,21 +408,21 @@ async function example10_ApiKeyValidation() {
   try {
     const openRouter = new OpenRouterService({
       apiKey: import.meta.env.OPENROUTER_API_KEY,
-      defaultModel: 'openai/gpt-3.5-turbo',
+      defaultModel: "openai/gpt-3.5-turbo",
     });
 
-    console.log('Validating API key...');
+    console.log("Validating API key...");
     const isValid = await openRouter.validateApiKey();
 
     if (isValid) {
-      console.log('✅ API key is valid');
+      console.log("✅ API key is valid");
     } else {
-      console.log('❌ API key validation failed');
+      console.log("❌ API key validation failed");
     }
 
     return isValid;
   } catch (error) {
-    console.error('Error validating API key:', error);
+    console.error("Error validating API key:", error);
     return false;
   }
 }
@@ -450,4 +443,3 @@ export const examples = {
   example9_ModelComparison,
   example10_ApiKeyValidation,
 };
-

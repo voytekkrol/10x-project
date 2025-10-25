@@ -1,6 +1,6 @@
 /**
  * Forgot Password Form Component
- * 
+ *
  * Form for requesting password reset email with validation and success message
  */
 
@@ -18,10 +18,10 @@ export function ForgotPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Clear previous states
     setError(null);
-    
+
     // Validate email with Zod schema
     const result = EmailSchema.safeParse(email);
     if (!result.success) {
@@ -30,16 +30,16 @@ export function ForgotPasswordForm() {
     }
 
     setIsLoading(true);
-    
+
     try {
       const supabase = getSupabaseBrowser();
-      
+
       // Get the current origin for the redirect URL
       const redirectTo = `${window.location.origin}/auth/confirm`;
-      
+
       console.log("Sending password reset email to:", email);
       console.log("Redirect URL:", redirectTo);
-      
+
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
       });
@@ -50,7 +50,7 @@ export function ForgotPasswordForm() {
         setIsLoading(false);
         return;
       }
-      
+
       // Success! Show confirmation message
       console.log("Password reset email sent successfully");
       setIsLoading(false);
@@ -148,11 +148,7 @@ export function ForgotPasswordForm() {
         </div>
 
         {/* Submit button */}
-        <Button 
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
               <svg
@@ -161,14 +157,7 @@ export function ForgotPasswordForm() {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -181,7 +170,7 @@ export function ForgotPasswordForm() {
             "Send Reset Link"
           )}
         </Button>
-        
+
         {/* Login link */}
         <p className="text-sm text-center text-muted-foreground">
           Remembered your password?{" "}
@@ -193,4 +182,3 @@ export function ForgotPasswordForm() {
     </div>
   );
 }
-

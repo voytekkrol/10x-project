@@ -11,25 +11,25 @@
 export interface OpenRouterConfig {
   /** OpenRouter API key (required) */
   apiKey: string;
-  
+
   /** Base URL for OpenRouter API (default: "https://openrouter.ai/api/v1") */
   baseUrl?: string;
-  
+
   /** Default model to use if not specified in request */
   defaultModel?: string;
-  
+
   /** HTTP referer for OpenRouter analytics (optional) */
   httpReferer?: string;
-  
+
   /** Application name identifier (optional) */
   appName?: string;
-  
+
   /** Maximum number of retry attempts for transient failures (default: 3) */
   maxRetries?: number;
-  
+
   /** Initial retry delay in milliseconds (default: 1000) */
   retryDelayMs?: number;
-  
+
   /** Request timeout in milliseconds (default: 30000) */
   timeoutMs?: number;
 }
@@ -40,7 +40,7 @@ export interface OpenRouterConfig {
 export interface ChatMessage {
   /** Role of the message sender */
   role: "system" | "user" | "assistant";
-  
+
   /** Content of the message */
   content: string;
 }
@@ -51,10 +51,10 @@ export interface ChatMessage {
 export interface JsonSchema {
   /** Schema name identifier */
   name: string;
-  
+
   /** Strict schema validation */
   strict: boolean;
-  
+
   /** JSON schema object */
   schema: Record<string, unknown>;
 }
@@ -65,7 +65,7 @@ export interface JsonSchema {
 export interface ResponseFormat {
   /** Response format type (only json_schema supported) */
   type: "json_schema";
-  
+
   /** JSON schema definition */
   json_schema: JsonSchema;
 }
@@ -76,25 +76,25 @@ export interface ResponseFormat {
 export interface ChatCompletionParams<T = unknown> {
   /** Array of conversation messages (required) */
   messages: ChatMessage[];
-  
+
   /** Model name (uses defaultModel if omitted) */
   model?: string;
-  
+
   /** Temperature for response randomness (0.0-2.0, default: 0.7) */
   temperature?: number;
-  
+
   /** Maximum tokens to generate (default: 1000) */
   maxTokens?: number;
-  
+
   /** Top-p nucleus sampling (0.0-1.0) */
   topP?: number;
-  
+
   /** Frequency penalty (-2.0 to 2.0) */
   frequencyPenalty?: number;
-  
+
   /** Presence penalty (-2.0 to 2.0) */
   presencePenalty?: number;
-  
+
   /** Structured JSON output configuration */
   responseFormat?: ResponseFormat;
 }
@@ -105,10 +105,10 @@ export interface ChatCompletionParams<T = unknown> {
 export interface TokenUsage {
   /** Number of tokens in the prompt */
   promptTokens: number;
-  
+
   /** Number of tokens in the completion */
   completionTokens: number;
-  
+
   /** Total tokens used (prompt + completion) */
   totalTokens: number;
 }
@@ -119,19 +119,19 @@ export interface TokenUsage {
 export interface ChatCompletionResponse<T = unknown> {
   /** Response content (string or structured object if responseFormat specified) */
   content: T extends Record<string, unknown> ? T : string;
-  
+
   /** Model used for generation */
   model: string;
-  
+
   /** Token usage statistics */
   usage: TokenUsage;
-  
+
   /** Duration of request in milliseconds */
   durationMs: number;
-  
+
   /** Finish reason (e.g., "stop", "length") */
   finishReason: string;
-  
+
   /** Request ID for tracking */
   requestId: string;
 }
@@ -157,18 +157,17 @@ export interface OpenRouterApiResponse {
   id: string;
   model: string;
   created: number;
-  choices: Array<{
+  choices: {
     message: {
       role: string;
       content: string;
     };
     finish_reason: string;
     index: number;
-  }>;
+  }[];
   usage: {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
   };
 }
-
