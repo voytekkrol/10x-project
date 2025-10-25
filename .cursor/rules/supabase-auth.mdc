@@ -26,26 +26,6 @@ npm install @supabase/ssr @supabase/supabase-js
 
 ## Environment Variables
 
-Create `.env` file with required Supabase credentials (based on the snippet below or `.env.example` in project root)
-
-```env
-SUPABASE_URL=your_project_url
-SUPABASE_KEY=your_anon_key
-```
-
-For better TypeScript support, create or update `src/env.d.ts`:
-
-```typescript
-/// <reference types="astro/client" />
-interface ImportMetaEnv {
-  readonly SUPABASE_URL: string;
-  readonly SUPABASE_KEY: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
-```
 When introducing new env variables or values stored on Astro.locals, always update `src/env.d.ts` to reflect these changes.
 
 Make sure `.env.example` is updated with the correct environment variables.
