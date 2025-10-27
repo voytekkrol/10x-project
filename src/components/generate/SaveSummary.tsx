@@ -26,6 +26,7 @@ export const SaveSummary = memo(function SaveSummary({ summary, onReset }: SaveS
     <div className="space-y-4">
       {/* Summary card */}
       <div
+        data-testid="save-summary"
         className={
           allFailed
             ? "rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-6"
@@ -141,7 +142,7 @@ export const SaveSummary = memo(function SaveSummary({ summary, onReset }: SaveS
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button onClick={onReset} size="lg" className="flex-1">
+          <Button data-testid="start-fresh-button" onClick={onReset} size="lg" className="flex-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"

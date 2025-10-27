@@ -13,14 +13,17 @@ interface SourceTextInputProps {
   sourceText: SourceTextState;
   onChange: (text: string) => void;
   disabled?: boolean;
+  showValidation?: boolean;
 }
 
 export const SourceTextInput = memo(function SourceTextInput({
   sourceText,
   onChange,
   disabled = false,
+  showValidation = false,
 }: SourceTextInputProps) {
   const counterColorClass = getCharCountColorClass(sourceText.charCount, sourceText.isValid);
+  const shouldShowError = showValidation || sourceText.charCount > 0;
 
   return (
     <div className="space-y-2">
@@ -35,6 +38,7 @@ export const SourceTextInput = memo(function SourceTextInput({
 
       <textarea
         id="source-text"
+        data-testid="source-text-input"
         value={sourceText.text}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -46,13 +50,13 @@ export const SourceTextInput = memo(function SourceTextInput({
           "focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "resize-y",
-          !sourceText.isValid && sourceText.charCount > 0 && "border-red-500 dark:border-red-400"
+          !sourceText.isValid && shouldShowError && "border-red-500 dark:border-red-400"
         )}
-        aria-invalid={!sourceText.isValid && sourceText.charCount > 0}
-        aria-describedby={sourceText.validationError ? "source-text-error" : undefined}
+        aria-invalid={!sourceText.isValid && shouldShowError}
+        aria-describedby={sourceText.validationError && shouldShowError ? "source-text-error" : undefined}
       />
 
-      {sourceText.validationError && (
+      {sourceText.validationError && shouldShowError && (
         <p id="source-text-error" className="text-sm text-red-600 dark:text-red-400" role="alert">
           {sourceText.validationError}
         </p>

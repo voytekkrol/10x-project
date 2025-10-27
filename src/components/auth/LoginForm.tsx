@@ -20,20 +20,24 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Clear previous errors
     setError(null);
+    setFieldErrors({});
 
     // Use zod schema for validation
     const result = LoginFormSchema.safeParse({ email, password });
     if (!result.success) {
-      // Get the first validation error
-      const fieldErrors = result.error.formErrors.fieldErrors;
-      const firstError = fieldErrors.email?.[0] || fieldErrors.password?.[0] || "Invalid form data";
-      setError(firstError);
+      // Set field-specific errors
+      const errors = result.error.formErrors.fieldErrors;
+      setFieldErrors({
+        email: errors.email?.[0],
+        password: errors.password?.[0],
+      });
       return;
     }
 
@@ -110,7 +114,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {/* Email field */}
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -128,10 +132,17 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               "bg-background text-foreground",
               "placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring",
-              "disabled:cursor-not-allowed disabled:opacity-50"
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              fieldErrors.email && "border-red-500 dark:border-red-400"
             )}
-            aria-describedby={error ? "login-error" : undefined}
+            aria-invalid={fieldErrors.email ? "true" : undefined}
+            aria-describedby={fieldErrors.email ? "email-error" : undefined}
           />
+          {fieldErrors.email && (
+            <p id="email-error" className="text-sm text-red-600 dark:text-red-400" role="alert">
+              {fieldErrors.email}
+            </p>
+          )}
         </div>
 
         {/* Password field */}
@@ -156,9 +167,17 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
               "bg-background text-foreground",
               "placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring",
-              "disabled:cursor-not-allowed disabled:opacity-50"
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              fieldErrors.password && "border-red-500 dark:border-red-400"
             )}
+            aria-invalid={fieldErrors.password ? "true" : undefined}
+            aria-describedby={fieldErrors.password ? "password-error" : undefined}
           />
+          {fieldErrors.password && (
+            <p id="password-error" className="text-sm text-red-600 dark:text-red-400" role="alert">
+              {fieldErrors.password}
+            </p>
+          )}
         </div>
 
         {/* Submit button */}

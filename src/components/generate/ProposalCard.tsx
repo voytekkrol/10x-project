@@ -104,7 +104,11 @@ export const ProposalCard = memo(function ProposalCard({
   };
 
   return (
-    <div className={cn("rounded-lg border p-4 space-y-4 transition-colors", getCardBorderClass())}>
+    <div
+      data-testid={`proposal-card-${index}`}
+      data-proposal-status={proposal.status}
+      className={cn("rounded-lg border p-4 space-y-4 transition-colors", getCardBorderClass())}
+    >
       {/* Header with index and status */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-medium text-muted-foreground">Proposal #{index + 1}</span>
@@ -118,6 +122,7 @@ export const ProposalCard = memo(function ProposalCard({
         </label>
         <textarea
           id={`proposal-${index}-front`}
+          data-testid={`proposal-${index}-front-input`}
           value={proposal.currentFront}
           onChange={(e) => onFieldChange(index, "front", e.target.value)}
           rows={2}
@@ -151,6 +156,7 @@ export const ProposalCard = memo(function ProposalCard({
         </label>
         <textarea
           id={`proposal-${index}-back`}
+          data-testid={`proposal-${index}-back-input`}
           value={proposal.currentBack}
           onChange={(e) => onFieldChange(index, "back", e.target.value)}
           rows={3}
@@ -181,6 +187,7 @@ export const ProposalCard = memo(function ProposalCard({
       {proposal.status === "pending" && (
         <div className="flex items-center gap-2 pt-2">
           <Button
+            data-testid={`proposal-${index}-accept-button`}
             onClick={() => onAccept(index)}
             size="sm"
             className="flex-1"
@@ -202,6 +209,7 @@ export const ProposalCard = memo(function ProposalCard({
             Accept
           </Button>
           <Button
+            data-testid={`proposal-${index}-reject-button`}
             onClick={() => onReject(index)}
             variant="outline"
             size="sm"

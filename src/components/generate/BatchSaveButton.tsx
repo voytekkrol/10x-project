@@ -35,6 +35,7 @@ export const BatchSaveButton = memo(function BatchSaveButton({
         </p>
       </div>
       <Button
+        data-testid="batch-save-button"
         onClick={onClick}
         disabled={disabled || isSaving}
         size="lg"

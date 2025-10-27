@@ -10,7 +10,7 @@ import { z } from "zod";
 export const EmailSchema = z
   .string()
   .min(1, { message: "Email is required" })
-  .email({ message: "Please enter a valid email address" });
+  .email({ message: "Invalid email format" });
 
 // Password validation for login (basic)
 export const PasswordLoginSchema = z.string().min(1, { message: "Password is required" });

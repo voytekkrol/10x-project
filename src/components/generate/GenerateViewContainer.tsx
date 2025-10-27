@@ -23,6 +23,7 @@ export function GenerateViewContainer() {
     proposals,
     saveState,
     rateLimit,
+    attemptedGenerate,
     handleSourceTextChange,
     handleGenerate,
     handleProposalChange,
@@ -83,6 +84,7 @@ export function GenerateViewContainer() {
             sourceText={sourceText}
             onChange={handleSourceTextChange}
             disabled={generation.isLoading || saveState.isSaving}
+            showValidation={attemptedGenerate}
           />
 
           <GenerateButton

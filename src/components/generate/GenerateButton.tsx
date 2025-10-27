@@ -23,6 +23,7 @@ export const GenerateButton = memo(function GenerateButton({
   return (
     <div className="flex flex-col gap-2">
       <Button
+        data-testid="generate-proposals-button"
         onClick={onClick}
         disabled={disabled || isLoading}
         size="lg"

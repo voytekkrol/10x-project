@@ -28,6 +28,16 @@ export class LoginPage {
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
+    // Wait a bit for React state to update and show validation errors
+    await this.page.waitForTimeout(500);
+  }
+  
+  async loginAndWaitForNavigation(email: string, password: string) {
+    await this.emailInput.fill(email);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+    // Wait for successful navigation to generate page
+    await this.page.waitForURL(/\/generate/, { timeout: 15000 });
   }
 
   async clickForgotPassword() {
@@ -39,12 +49,15 @@ export class LoginPage {
   }
 
   async expectValidationError(field: "email" | "password", message: string) {
+    // First wait for the error message to be visible
+    await expect(this.page.getByText(message)).toBeVisible();
+    
+    // Then check aria-invalid attribute
     if (field === "email") {
       await expect(this.emailInput).toHaveAttribute("aria-invalid", "true");
     } else {
       await expect(this.passwordInput).toHaveAttribute("aria-invalid", "true");
     }
-    await expect(this.page.getByText(message)).toBeVisible();
   }
 
   async expectLoggedIn() {

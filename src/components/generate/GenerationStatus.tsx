@@ -19,6 +19,7 @@ export const GenerationStatus = memo(function GenerationStatus({ isLoading, elap
 
   return (
     <div
+      data-testid="generation-status"
       className="flex items-center gap-3 px-4 py-3 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800"
       role="status"
       aria-live="polite"

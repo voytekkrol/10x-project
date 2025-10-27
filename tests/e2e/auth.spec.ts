@@ -26,24 +26,30 @@ test.describe("Authentication", () => {
     await loginPage.clickForgotPassword();
 
     await expect(page).toHaveURL(/.*\/auth\/forgot-password/);
-    await expect(page).toHaveTitle(/Forgot Password/);
+    await expect(page).toHaveTitle(/Reset Password/);
   });
 
   test("should redirect to generate page after successful login", async ({ page }) => {
-    // Note: This test assumes a mocked authentication or test credentials
+    // Note: This test requires E2E credentials to be set in environment
     const loginPage = new LoginPage(page);
     await loginPage.goto();
-    await loginPage.login("test@example.com", "password123");
+    
+    // Use the method that waits for navigation
+    await loginPage.loginAndWaitForNavigation(
+      process.env.E2E_USERNAME || "test@example.com",
+      process.env.E2E_PASSWORD || "password123"
+    );
 
-    await loginPage.expectLoggedIn();
     await expect(page).toHaveTitle(/Generate/);
+    await expect(page).toHaveURL(/\/generate/);
   });
 
   test("should meet accessibility standards", async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
 
-    const accessibilityScanResults = await setupAxe(page).analyze();
+    const axeBuilder = await setupAxe(page);
+    const accessibilityScanResults = await axeBuilder.analyze();
 
     // Assert no violations
     expect(accessibilityScanResults.violations).toEqual([]);

@@ -44,6 +44,8 @@ export function useGenerateFlashcards() {
     validationError: null,
   });
 
+  const [attemptedGenerate, setAttemptedGenerate] = useState(false);
+
   const [generation, setGeneration] = useState<GenerationState>({
     isLoading: false,
     elapsedTime: 0,
@@ -186,16 +188,24 @@ export function useGenerateFlashcards() {
         validationError: validation.error,
       });
 
+      // Reset attempted generate flag when text changes
+      if (attemptedGenerate) {
+        setAttemptedGenerate(false);
+      }
+
       // Save draft with debounce (500ms delay)
       debouncedSaveDraft(text);
     },
-    [debouncedSaveDraft]
+    [debouncedSaveDraft, attemptedGenerate]
   );
 
   /**
    * Handle generation of proposals from source text
    */
   const handleGenerate = useCallback(async () => {
+    // Mark that user attempted to generate
+    setAttemptedGenerate(true);
+
     if (!sourceText.isValid || generation.isLoading) {
       return;
     }
@@ -553,6 +563,7 @@ export function useGenerateFlashcards() {
       isValid: false,
       validationError: null,
     });
+    setAttemptedGenerate(false);
     setGeneration({
       isLoading: false,
       elapsedTime: 0,
@@ -579,6 +590,7 @@ export function useGenerateFlashcards() {
     proposals,
     saveState,
     rateLimit,
+    attemptedGenerate,
 
     // Handlers
     handleSourceTextChange,
