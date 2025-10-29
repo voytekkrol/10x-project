@@ -35,10 +35,12 @@ test.describe("Authentication", () => {
     await loginPage.goto();
 
     // Use the method that waits for navigation
-    await loginPage.loginAndWaitForNavigation(
-      process.env.E2E_USERNAME || "test@example.com",
-      process.env.E2E_PASSWORD || "password123"
-    );
+    const email = process.env.TEST_USER_EMAIL;
+    const password = process.env.TEST_USER_PASSWORD;
+    if (!email || !password) {
+      test.skip(true, "E2E credentials not configured. Set TEST_USER_EMAIL and TEST_USER_PASSWORD in .env.test");
+    }
+    await loginPage.loginAndWaitForNavigation(email, password);
 
     await expect(page).toHaveTitle(/Generate/);
     await expect(page).toHaveURL(/\/generate/);

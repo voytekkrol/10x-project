@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 import { config } from "dotenv";
 
-// Load test environment variables
+// Load test environment variables into process.env
 config({ path: ".env.test" });
 
 export default defineConfig({
@@ -36,5 +36,8 @@ export default defineConfig({
     stdout: "pipe",
     stderr: "pipe",
     timeout: 120000, // Increase server startup timeout
+    // Pass all environment variables to the preview server
+    // This ensures OPENROUTER_API_KEY and other vars from .env.test are available
+    env: process.env,
   },
 });

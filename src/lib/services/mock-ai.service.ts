@@ -76,8 +76,10 @@ Focus on creating flashcards that will help someone truly learn and retain the m
  */
 function createOpenRouterService(): OpenRouterService {
   // Get configuration from environment
-  const apiKey = import.meta.env.OPENROUTER_API_KEY;
-  const defaultModel = import.meta.env.OPENROUTER_DEFAULT_MODEL || "openai/gpt-4-turbo";
+  // Use process.env for runtime access (server-side) or import.meta.env as fallback
+  // process.env is available at runtime and allows .env.test to work in tests
+  const apiKey = process.env.OPENROUTER_API_KEY || import.meta.env.OPENROUTER_API_KEY;
+  const defaultModel = process.env.OPENROUTER_DEFAULT_MODEL || import.meta.env.OPENROUTER_DEFAULT_MODEL || "openai/gpt-4-turbo";
 
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY environment variable is not set");

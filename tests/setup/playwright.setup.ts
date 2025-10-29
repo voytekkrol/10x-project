@@ -12,11 +12,18 @@ export async function setupAxe(page: Page) {
 
 /**
  * Utility to login a user for tests requiring authentication
+ * Uses TEST_USER_EMAIL and TEST_USER_PASSWORD environment variables
  */
-export async function login(page: Page, email = process.env.E2E_USERNAME, password = process.env.E2E_PASSWORD) {
+export async function login(
+  page: Page,
+  email = process.env.TEST_USER_EMAIL,
+  password = process.env.TEST_USER_PASSWORD
+) {
   if (!email || !password) {
+    const emailSet = process.env.TEST_USER_EMAIL ? "SET" : "MISSING";
+    const passwordSet = process.env.TEST_USER_PASSWORD ? "SET" : "MISSING";
     throw new Error(
-      `Missing E2E credentials. E2E_USERNAME: ${email ? "SET" : "MISSING"}, E2E_PASSWORD: ${password ? "SET" : "MISSING"}`
+      `Missing E2E credentials. TEST_USER_EMAIL: ${emailSet}, TEST_USER_PASSWORD: ${passwordSet}`
     );
   }
 
