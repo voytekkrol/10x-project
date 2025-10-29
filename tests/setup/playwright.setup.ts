@@ -22,9 +22,7 @@ export async function login(
   if (!email || !password) {
     const emailSet = process.env.TEST_USER_EMAIL ? "SET" : "MISSING";
     const passwordSet = process.env.TEST_USER_PASSWORD ? "SET" : "MISSING";
-    throw new Error(
-      `Missing E2E credentials. TEST_USER_EMAIL: ${emailSet}, TEST_USER_PASSWORD: ${passwordSet}`
-    );
+    throw new Error(`Missing E2E credentials. TEST_USER_EMAIL: ${emailSet}, TEST_USER_PASSWORD: ${passwordSet}`);
   }
 
   await page.goto("/auth/login");

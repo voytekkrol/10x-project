@@ -24,22 +24,18 @@ if (!user) {
 // Add environment variables for client-side components
 const SUPABASE_URL = import.meta.env.SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
-const envVars = { SUPABASE_URL, SUPABASE_KEY };
 ---
 
-<!-- eslint-disable-next-line prettier/prettier -->
-<script is:inline define:vars={envVars}>
-  // prettier-ignore
-  // Set client-side environment variables
+<script set:html={`
   window.ENV = {
-    SUPABASE_URL,
-    SUPABASE_KEY,
+    SUPABASE_URL: ${JSON.stringify(SUPABASE_URL)},
+    SUPABASE_KEY: ${JSON.stringify(SUPABASE_KEY)},
   };
   console.log("[Generate Page] Environment variables set:", {
     hasUrl: !!window.ENV.SUPABASE_URL,
     hasKey: !!window.ENV.SUPABASE_KEY,
   });
-</script>
+`}></script>
 
 <Layout title="Generate Flashcards - 10x Cards">
   <NavigationBar userEmail={userEmail} client:load />
