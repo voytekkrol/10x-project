@@ -13,36 +13,34 @@ export async function setupAxe(page: Page) {
 /**
  * Utility to login a user for tests requiring authentication
  */
-export async function login(
-  page: Page,
-  email = process.env.E2E_USERNAME,
-  password = process.env.E2E_PASSWORD
-) {
+export async function login(page: Page, email = process.env.E2E_USERNAME, password = process.env.E2E_PASSWORD) {
   if (!email || !password) {
-    throw new Error(`Missing E2E credentials. E2E_USERNAME: ${email ? 'SET' : 'MISSING'}, E2E_PASSWORD: ${password ? 'SET' : 'MISSING'}`);
+    throw new Error(
+      `Missing E2E credentials. E2E_USERNAME: ${email ? "SET" : "MISSING"}, E2E_PASSWORD: ${password ? "SET" : "MISSING"}`
+    );
   }
-  
+
   await page.goto("/auth/login");
-  
+
   // Wait for the form to be fully loaded and React to hydrate
-  await page.waitForLoadState('domcontentloaded');
-  
+  await page.waitForLoadState("domcontentloaded");
+
   // Wait for the email input to be visible and interactive
-  const emailInput = page.locator('#email');
-  await emailInput.waitFor({ state: 'visible', timeout: 10000 });
-  
+  const emailInput = page.locator("#email");
+  await emailInput.waitFor({ state: "visible", timeout: 10000 });
+
   // Fill the form fields with proper waiting
   await emailInput.fill(email);
-  await page.locator('#password').fill(password);
-  
+  await page.locator("#password").fill(password);
+
   // Click login button and wait for navigation
   await page.getByRole("button", { name: "Log in" }).click();
-  
+
   // Wait for navigation away from login page
   await page.waitForURL(/\/generate/, { timeout: 10000 });
-  
+
   // Wait for the page to be fully loaded and React to hydrate
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState("networkidle");
   await page.waitForTimeout(1000); // Give React time to hydrate
 }
 

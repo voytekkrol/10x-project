@@ -4,11 +4,11 @@
  * Email/password form with validation and error display
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
-import { LoginFormSchema, type LoginFormValues } from "../../lib/validation/auth.schemas";
+import { LoginFormSchema } from "../../lib/validation/auth.schemas";
 import { mapAuthError } from "../../lib/utils/auth-errors";
 
 interface LoginFormProps {
@@ -206,7 +206,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
 
         {/* Register link */}
         <p className="text-sm text-center text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a href="/auth/register" className="text-primary hover:underline font-medium">
             Register
           </a>

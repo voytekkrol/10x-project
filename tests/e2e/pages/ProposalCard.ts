@@ -7,36 +7,36 @@ import { type Page, type Locator, expect } from "@playwright/test";
 export class ProposalCard {
   readonly page: Page;
   readonly index: number;
-  
+
   // Card container
   readonly container: Locator;
-  
+
   // Input fields
   readonly frontInput: Locator;
   readonly backInput: Locator;
-  
+
   // Action buttons
   readonly acceptButton: Locator;
   readonly rejectButton: Locator;
-  
+
   // Status indicators
   readonly statusBadge: Locator;
 
   constructor(page: Page, index: number) {
     this.page = page;
     this.index = index;
-    
+
     // Card container with data attributes
     this.container = page.getByTestId(`proposal-card-${index}`);
-    
+
     // Input fields
     this.frontInput = page.getByTestId(`proposal-${index}-front-input`);
     this.backInput = page.getByTestId(`proposal-${index}-back-input`);
-    
+
     // Action buttons
     this.acceptButton = page.getByTestId(`proposal-${index}-accept-button`);
     this.rejectButton = page.getByTestId(`proposal-${index}-reject-button`);
-    
+
     // Status badge (varies by status)
     this.statusBadge = this.container.locator('[class*="badge"]').first();
   }
@@ -197,7 +197,6 @@ export class ProposalCard {
    */
   async expectFrontError(errorMessage: string) {
     await expect(this.frontInput).toHaveAttribute("aria-invalid", "true");
-    const errorId = `proposal-${this.index}-front-error`;
     await expect(this.page.getByText(errorMessage)).toBeVisible();
   }
 
@@ -206,7 +205,6 @@ export class ProposalCard {
    */
   async expectBackError(errorMessage: string) {
     await expect(this.backInput).toHaveAttribute("aria-invalid", "true");
-    const errorId = `proposal-${this.index}-back-error`;
     await expect(this.page.getByText(errorMessage)).toBeVisible();
   }
 
@@ -232,4 +230,3 @@ export class ProposalCard {
     await expect(this.rejectButton).toBeHidden();
   }
 }
-

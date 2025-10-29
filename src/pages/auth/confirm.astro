@@ -12,8 +12,7 @@
 
 import AuthLayout from "../../layouts/AuthLayout.astro";
 
-// Get type from URL parameters to determine flow
-const type = Astro.url.searchParams.get("type");
+// Get error from URL parameters
 const error = Astro.url.searchParams.get("error");
 const errorDescription = Astro.url.searchParams.get("error_description");
 
@@ -90,8 +89,9 @@ if (error) {
     <p>© {new Date().getFullYear()} 10x Cards. All rights reserved.</p>
   </div>
 </AuthLayout>
-
+<!-- eslint-disable-next-line prettier/prettier -->
 <script>
+  // prettier-ignore
   import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
 
   // This script runs on the client to handle the auth token from the URL hash

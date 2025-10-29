@@ -25,7 +25,7 @@ test.describe("Generate Page", () => {
     await generatePage.expectPageLoaded();
   });
 
-  test.afterEach(async ({ page, context }) => {
+  test.afterEach(async ({ context }) => {
     // Clean up after each test
     await context.clearCookies();
   });

@@ -31,7 +31,7 @@ export class LoginPage {
     // Wait a bit for React state to update and show validation errors
     await this.page.waitForTimeout(500);
   }
-  
+
   async loginAndWaitForNavigation(email: string, password: string) {
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
@@ -51,7 +51,7 @@ export class LoginPage {
   async expectValidationError(field: "email" | "password", message: string) {
     // First wait for the error message to be visible
     await expect(this.page.getByText(message)).toBeVisible();
-    
+
     // Then check aria-invalid attribute
     if (field === "email") {
       await expect(this.emailInput).toHaveAttribute("aria-invalid", "true");

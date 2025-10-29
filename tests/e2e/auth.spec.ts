@@ -33,7 +33,7 @@ test.describe("Authentication", () => {
     // Note: This test requires E2E credentials to be set in environment
     const loginPage = new LoginPage(page);
     await loginPage.goto();
-    
+
     // Use the method that waits for navigation
     await loginPage.loginAndWaitForNavigation(
       process.env.E2E_USERNAME || "test@example.com",

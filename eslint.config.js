@@ -15,17 +15,40 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const gitignorePath = path.resolve(__dirname, ".gitignore");
 
-const baseConfig = tseslint.config({
-  extends: [eslint.configs.recommended, tseslint.configs.strict, tseslint.configs.stylistic],
-  rules: {
-    "no-console": "warn",
-    "no-unused-vars": "off",
+const baseConfig = tseslint.config(
+  eslint.configs.recommended,
+  ...tseslint.configs.strict,
+  ...tseslint.configs.stylistic,
+  {
+    rules: {
+      "no-console": "warn",
+      "no-unused-vars": "off",
+    },
+  }
+);
+
+const nodeConfig = tseslint.config({
+  files: ["**/*.js", "setup-tests.js", "*.config.*"],
+  languageOptions: {
+    globals: {
+      console: "readonly",
+      process: "readonly",
+      Buffer: "readonly",
+      __dirname: "readonly",
+      __filename: "readonly",
+      global: "readonly",
+      module: "readonly",
+      require: "readonly",
+      exports: "readonly",
+    },
   },
 });
 
 const jsxA11yConfig = tseslint.config({
   files: ["**/*.{js,jsx,ts,tsx}"],
-  extends: [jsxA11y.flatConfigs.recommended],
+  plugins: {
+    "jsx-a11y": jsxA11y,
+  },
   languageOptions: {
     ...jsxA11y.flatConfigs.recommended.languageOptions,
   },
@@ -36,23 +59,31 @@ const jsxA11yConfig = tseslint.config({
 
 const reactConfig = tseslint.config({
   files: ["**/*.{js,jsx,ts,tsx}"],
-  extends: [pluginReact.configs.flat.recommended],
-  languageOptions: {
-    ...pluginReact.configs.flat.recommended.languageOptions,
-    globals: {
-      window: true,
-      document: true,
-    },
-  },
   plugins: {
+    react: pluginReact,
     "react-hooks": eslintPluginReactHooks,
     "react-compiler": reactCompiler,
   },
+  languageOptions: {
+    ...pluginReact.configs.flat.recommended.languageOptions,
+    globals: {
+      window: "readonly",
+      document: "readonly",
+    },
+  },
   settings: { react: { version: "detect" } },
   rules: {
+    ...pluginReact.configs.flat.recommended.rules,
     ...eslintPluginReactHooks.configs.recommended.rules,
     "react/react-in-jsx-scope": "off",
     "react-compiler/react-compiler": "error",
+  },
+});
+
+const astroPrettierOff = tseslint.config({
+  files: ["src/pages/**/register.astro", "src/pages/**/generate.astro", "src/pages/**/confirm.astro"],
+  rules: {
+    "prettier/prettier": "off",
   },
 });
 
@@ -62,8 +93,10 @@ export default tseslint.config(
     ignores: ["test-generation-endpoint.js"],
   },
   baseConfig,
+  nodeConfig,
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
-  eslintPluginPrettier
+  eslintPluginPrettier,
+  astroPrettierOff
 );

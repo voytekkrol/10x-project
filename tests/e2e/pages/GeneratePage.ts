@@ -6,43 +6,43 @@ import { ProposalCard } from "./ProposalCard";
  */
 export class GeneratePage {
   readonly page: Page;
-  
+
   // Source Text Section
   readonly sourceTextInput: Locator;
   readonly generateButton: Locator;
-  
+
   // Status Indicators
   readonly generationStatus: Locator;
   readonly rateLimitNotice: Locator;
   readonly generationError: Locator;
-  
+
   // Proposals Section
   readonly proposalsList: Locator;
   readonly batchSaveButton: Locator;
   readonly saveSummary: Locator;
   readonly startFreshButton: Locator;
-  
+
   // Page Elements
   readonly pageHeading: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    
+
     // Source Text Section
     this.sourceTextInput = page.getByTestId("source-text-input");
     this.generateButton = page.getByTestId("generate-proposals-button");
-    
+
     // Status Indicators
     this.generationStatus = page.getByTestId("generation-status");
     this.rateLimitNotice = page.getByRole("alert").filter({ hasText: "Rate Limit Reached" });
     this.generationError = page.getByRole("alert").filter({ hasText: "Generation Failed" });
-    
+
     // Proposals Section
     this.proposalsList = page.locator('[data-testid^="proposal-card-"]');
     this.batchSaveButton = page.getByTestId("batch-save-button");
     this.saveSummary = page.getByTestId("save-summary");
     this.startFreshButton = page.getByTestId("start-fresh-button");
-    
+
     // Page Elements
     this.pageHeading = page.getByRole("heading", { name: "Generate Flashcards" });
   }
@@ -250,4 +250,3 @@ export class GeneratePage {
     await expect(this.generateButton).toBeEnabled();
   }
 }
-

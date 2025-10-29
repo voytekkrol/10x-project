@@ -82,7 +82,7 @@ export function ForgotPasswordForm() {
         </div>
         <h3 className="text-lg font-medium text-foreground">Check your email</h3>
         <p className="text-muted-foreground">
-          If an account exists with this email address, we've sent password reset instructions.
+          If an account exists with this email address, we&apos;ve sent password reset instructions.
         </p>
         <Button asChild variant="outline" className="mt-4">
           <a href="/auth/login">Back to Login</a>
@@ -119,7 +119,7 @@ export function ForgotPasswordForm() {
       )}
 
       <p className="text-sm text-muted-foreground">
-        Enter your email address and we'll send you a link to reset your password.
+        Enter your email address and we&apos;ll send you a link to reset your password.
       </p>
 
       {/* Form */}

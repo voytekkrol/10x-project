@@ -73,7 +73,7 @@ export interface ResponseFormat {
 /**
  * Parameters for chat completion request
  */
-export interface ChatCompletionParams<T = unknown> {
+export interface ChatCompletionParams {
   /** Array of conversation messages (required) */
   messages: ChatMessage[];
 

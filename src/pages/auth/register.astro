@@ -17,9 +17,12 @@ if (Astro.locals.user) {
 // Add environment variables for client-side components
 const SUPABASE_URL = import.meta.env.SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.SUPABASE_KEY;
+const envVars = { SUPABASE_URL, SUPABASE_KEY };
 ---
 
-<script is:inline define:vars={{ SUPABASE_URL, SUPABASE_KEY }}>
+<!-- eslint-disable-next-line prettier/prettier -->
+<script is:inline define:vars={envVars}>
+  // prettier-ignore
   // Set client-side environment variables
   window.ENV = {
     SUPABASE_URL,

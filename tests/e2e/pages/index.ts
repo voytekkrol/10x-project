@@ -6,4 +6,3 @@
 export { LoginPage } from "./LoginPage";
 export { GeneratePage } from "./GeneratePage";
 export { ProposalCard } from "./ProposalCard";
-

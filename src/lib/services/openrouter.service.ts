@@ -389,7 +389,7 @@ export class OpenRouterService {
     if (isStructuredOutput) {
       try {
         content = JSON.parse(rawContent) as T;
-      } catch (error) {
+      } catch {
         throw new StructuredOutputError("Failed to parse structured JSON output from AI response", rawContent, {});
       }
     }

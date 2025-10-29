@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import { getSupabaseBrowser } from "../../lib/utils/supabase-browser";
-import { RegisterFormSchema, type RegisterFormValues } from "../../lib/validation/auth.schemas";
+import { RegisterFormSchema } from "../../lib/validation/auth.schemas";
 import { mapAuthError } from "../../lib/utils/auth-errors";
 
 export function RegisterForm() {
@@ -101,7 +101,7 @@ export function RegisterForm() {
         <h3 className="text-lg font-medium text-foreground">Check your email!</h3>
         <div className="text-muted-foreground space-y-2">
           <p>
-            We've sent a confirmation link to <strong className="text-foreground">{email}</strong>
+            We&apos;ve sent a confirmation link to <strong className="text-foreground">{email}</strong>
           </p>
           <p>Please check your email and click the link to activate your account before logging in.</p>
         </div>
