@@ -95,3 +95,17 @@ export const ListFlashcardsQuerySchema = z.object({
 });
 
 export type ListFlashcardsQueryInput = z.infer<typeof ListFlashcardsQuerySchema>;
+
+/**
+ * Schema for path params of GET /api/flashcards/:id
+ * Validates numeric id, coerces from string, ensures positive safe integer
+ */
+export const FlashcardIdParamSchema = z.object({
+  id: z
+    .string()
+    .regex(/^\d+$/, { message: "id must be a positive integer" })
+    .transform((v) => Number(v))
+    .refine((n) => Number.isSafeInteger(n) && n > 0, "Invalid id"),
+});
+
+export type FlashcardIdParamInput = z.infer<typeof FlashcardIdParamSchema>;

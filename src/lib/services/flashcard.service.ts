@@ -196,3 +196,43 @@ export async function listFlashcards(params: {
 
   return { rows, total: count ?? 0 };
 }
+
+/**
+ * Get a single flashcard by id for a specific user. Returns null if not found.
+ */
+export async function getFlashcardById(params: {
+  supabase: SupabaseClient;
+  userId: string;
+  id: number;
+}): Promise<FlashcardDTO | null> {
+  const { supabase, userId, id } = params;
+
+  const { data, error } = await supabase
+    .from("flashcards")
+    .select("id, front, back, source, generation_id, created_at, updated_at")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to fetch flashcard by id:", { id, userId, error });
+    throw new Error("Failed to fetch flashcard");
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const dto: FlashcardDTO = {
+    id: data.id,
+    front: data.front,
+    back: data.back,
+    source: data.source as FlashcardDTO["source"],
+    generation_id: data.generation_id,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+  };
+
+  return dto;
+}
