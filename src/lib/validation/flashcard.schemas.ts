@@ -80,3 +80,18 @@ export const CreateFlashcardsCommandSchema = z
  * This ensures type safety between validation and business logic
  */
 export type CreateFlashcardsInput = z.infer<typeof CreateFlashcardsCommandSchema>;
+
+/**
+ * Schema for GET /api/flashcards query parameters
+ *
+ * Supports pagination, optional filtering, and sorting.
+ */
+export const ListFlashcardsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  source: z.enum(["ai-full", "ai-edited", "manual"]).optional(),
+  sort: z.enum(["asc", "desc"]).default("desc"),
+  generation_id: z.coerce.number().int().positive().optional(),
+});
+
+export type ListFlashcardsQueryInput = z.infer<typeof ListFlashcardsQuerySchema>;

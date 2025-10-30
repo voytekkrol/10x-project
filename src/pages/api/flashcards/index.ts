@@ -12,9 +12,11 @@ import {
   createFlashcards,
   validateGenerationExists,
   updateAcceptanceCounts,
+  listFlashcards,
 } from "../../../lib/services/flashcard.service";
-import { CreateFlashcardsCommandSchema } from "../../../lib/validation/flashcard.schemas";
-import type { ErrorResponseDTO, FlashcardDTO } from "../../../types";
+import { CreateFlashcardsCommandSchema, ListFlashcardsQuerySchema } from "../../../lib/validation/flashcard.schemas";
+import type { ErrorResponseDTO, FlashcardDTO, FlashcardListResponseDTO } from "../../../types";
+import { getUserId } from "../../../lib/utils/auth-helpers";
 
 export const prerender = false;
 
@@ -115,6 +117,90 @@ export const POST: APIRoute = async ({ request }) => {
       headers: {
         "Content-Type": "application/json",
       },
+    });
+  }
+};
+
+/**
+ * GET /api/flashcards - List authenticated user's flashcards
+ */
+export const GET: APIRoute = async ({ locals, url }) => {
+  try {
+    const supabase = locals.supabase;
+    const session = locals.session ?? null;
+
+    if (!supabase || !session) {
+      const errorResponse: ErrorResponseDTO = {
+        error: "Unauthorized",
+        message: "Authentication required",
+        code: "AUTHENTICATION_REQUIRED",
+        timestamp: new Date().toISOString(),
+      };
+      return new Response(JSON.stringify(errorResponse), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Parse and validate query parameters
+    const rawQuery = Object.fromEntries(url.searchParams.entries());
+    const parsed = ListFlashcardsQuerySchema.safeParse(rawQuery);
+    if (!parsed.success) {
+      const errorResponse: ErrorResponseDTO = {
+        error: "Validation Error",
+        message: "Invalid query parameters",
+        details: parsed.error.errors.map((err) => ({
+          field: err.path.join("."),
+          message: err.message,
+        })),
+        code: "VALIDATION_ERROR",
+        timestamp: new Date().toISOString(),
+      };
+      return new Response(JSON.stringify(errorResponse), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = getUserId(session);
+    const { rows, total } = await listFlashcards({
+      supabase,
+      userId,
+      query: parsed.data,
+    });
+
+    const page = parsed.data.page ?? 1;
+    const limit = parsed.data.limit ?? 50;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    const responseBody: FlashcardListResponseDTO = {
+      data: rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        total_pages: totalPages,
+        has_next: page < totalPages,
+        has_prev: page > 1,
+      },
+    };
+
+    return new Response(JSON.stringify(responseBody), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error in GET /api/flashcards:", error);
+    const errorResponse: ErrorResponseDTO = {
+      error: "Internal Server Error",
+      message: "An unexpected error occurred",
+      code: "INTERNAL_ERROR",
+      timestamp: new Date().toISOString(),
+    };
+    return new Response(JSON.stringify(errorResponse), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
 };

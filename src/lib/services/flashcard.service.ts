@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database } from "../../db/database.types";
-import type { FlashcardCreateDto } from "../../types";
+import type { FlashcardCreateDto, FlashcardDTO, ListFlashcardsQuery } from "../../types";
 
 type FlashcardInsert = Database["public"]["Tables"]["flashcards"]["Insert"];
 type FlashcardRow = Database["public"]["Tables"]["flashcards"]["Row"];
@@ -121,4 +121,78 @@ export async function updateAcceptanceCounts(
     // Don't throw - acceptance count update is not critical for flashcard creation
     // Log the error but allow the request to succeed
   }
+}
+
+/**
+ * List flashcards for a user with pagination, filtering, and sorting.
+ * Returns rows mapped to DTOs and the exact total count for pagination.
+ */
+export async function listFlashcards(params: {
+  supabase: SupabaseClient;
+  userId: string;
+  query: ListFlashcardsQuery;
+}): Promise<{ rows: FlashcardDTO[]; total: number }> {
+  const { supabase, userId, query } = params;
+  const page = query.page ?? 1;
+  const limit = query.limit ?? 50;
+  const sort = query.sort ?? "desc";
+
+  const offset = (page - 1) * limit;
+  const to = offset + limit - 1;
+
+  // Build base data query
+  let dataQuery = supabase
+    .from("flashcards")
+    .select("id, front, back, source, generation_id, created_at, updated_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: sort === "asc" })
+    .range(offset, to);
+
+  if (query.source) {
+    dataQuery = dataQuery.eq("source", query.source);
+  }
+
+  if (query.generation_id) {
+    dataQuery = dataQuery.eq("generation_id", query.generation_id);
+  }
+
+  const [{ data, error }, { count, error: countError }] = await Promise.all([
+    dataQuery,
+    // Separate count query with identical filters
+    (() => {
+      let countQuery = supabase.from("flashcards").select("id", { count: "exact", head: true }).eq("user_id", userId);
+
+      if (query.source) {
+        countQuery = countQuery.eq("source", query.source);
+      }
+      if (query.generation_id) {
+        countQuery = countQuery.eq("generation_id", query.generation_id);
+      }
+      return countQuery;
+    })(),
+  ]);
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to list flashcards:", error);
+    throw new Error("Failed to list flashcards");
+  }
+
+  if (countError) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to count flashcards:", countError);
+    throw new Error("Failed to count flashcards");
+  }
+
+  const rows: FlashcardDTO[] = (data ?? []).map((row) => ({
+    id: row.id,
+    front: row.front,
+    back: row.back,
+    source: row.source as FlashcardDTO["source"],
+    generation_id: row.generation_id,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }));
+
+  return { rows, total: count ?? 0 };
 }
