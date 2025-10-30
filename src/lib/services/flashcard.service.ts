@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database } from "../../db/database.types";
-import type { FlashcardCreateDto, FlashcardDTO, ListFlashcardsQuery } from "../../types";
+import type { FlashcardCreateDto, FlashcardDTO, ListFlashcardsQuery, UpdateFlashcardCommand } from "../../types";
 
 type FlashcardInsert = Database["public"]["Tables"]["flashcards"]["Insert"];
 type FlashcardRow = Database["public"]["Tables"]["flashcards"]["Row"];
@@ -218,6 +218,80 @@ export async function getFlashcardById(params: {
     // eslint-disable-next-line no-console
     console.error("Failed to fetch flashcard by id:", { id, userId, error });
     throw new Error("Failed to fetch flashcard");
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const dto: FlashcardDTO = {
+    id: data.id,
+    front: data.front,
+    back: data.back,
+    source: data.source as FlashcardDTO["source"],
+    generation_id: data.generation_id,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+  };
+
+  return dto;
+}
+
+/**
+ * Delete a single flashcard by id for a specific user.
+ * Returns true if a row was deleted, false if no matching row was found.
+ */
+export async function deleteFlashcard(params: {
+  supabase: SupabaseClient;
+  userId: string;
+  id: number;
+}): Promise<boolean> {
+  const { supabase, userId, id } = params;
+
+  const { error, count } = await supabase
+    .from("flashcards")
+    .delete({ count: "exact" })
+    .eq("id", id)
+    .eq("user_id", userId);
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to delete flashcard:", { id, userId, error });
+    throw new Error("Failed to delete flashcard");
+  }
+
+  return (count ?? 0) > 0;
+}
+
+/**
+ * Update a single flashcard's editable fields for a specific user.
+ * Returns the updated DTO, or null if not found/unauthorized.
+ */
+export async function updateFlashcard(params: {
+  supabase: SupabaseClient;
+  userId: string;
+  id: number;
+  command: UpdateFlashcardCommand;
+}): Promise<FlashcardDTO | null> {
+  const { supabase, userId, id, command } = params;
+
+  const updates = {
+    front: command.front.trim(),
+    back: command.back.trim(),
+  } as const;
+
+  const { data, error } = await supabase
+    .from("flashcards")
+    .update(updates)
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("id, front, back, source, generation_id, created_at, updated_at")
+    .maybeSingle();
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to update flashcard:", { id, userId, error });
+    throw new Error("Failed to update flashcard");
   }
 
   if (!data) {

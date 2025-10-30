@@ -109,3 +109,14 @@ export const FlashcardIdParamSchema = z.object({
 });
 
 export type FlashcardIdParamInput = z.infer<typeof FlashcardIdParamSchema>;
+
+/**
+ * Schema for PUT /api/flashcards/:id body
+ * Validates editable fields and enforces length constraints.
+ */
+export const UpdateFlashcardCommandSchema = z.object({
+  front: z.string().trim().min(1, "Front text is required").max(200, "Front text must not exceed 200 characters"),
+  back: z.string().trim().min(1, "Back text is required").max(500, "Back text must not exceed 500 characters"),
+});
+
+export type UpdateFlashcardCommandInput = z.infer<typeof UpdateFlashcardCommandSchema>;
