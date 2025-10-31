@@ -67,6 +67,12 @@ export function NavigationBar({ userEmail = "" }: NavigationBarProps) {
               >
                 Generate
               </a>
+              <a
+                href="/flashcards"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Flashcards
+              </a>
               {/* Additional nav links would go here */}
             </div>
           </div>

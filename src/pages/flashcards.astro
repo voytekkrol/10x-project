@@ -1,0 +1,32 @@
+---
+/**
+ * Flashcards App Page
+ *
+ * Main page for viewing and managing flashcards.
+ * Shows list of flashcards with CRUD operations.
+ */
+
+import Layout from "@/layouts/Layout.astro";
+import FlashcardsApp from "@/components/flashcards/FlashcardsApp";
+import { NavigationBar } from "@/components/layout/NavigationBar";
+
+// Get user information from context.locals
+const { user } = Astro.locals;
+const userEmail = user?.email || "";
+
+// If user is not authenticated, redirect to login
+if (!user) {
+  return Astro.redirect("/auth/login?redirect=/flashcards");
+}
+---
+
+<Layout title="Flashcards - 10x Cards">
+  <NavigationBar userEmail={userEmail} client:load />
+  <main class="container mx-auto px-4 py-6">
+    <section aria-labelledby="flashcards-heading" class="w-full">
+      <h1 id="flashcards-heading" class="text-2xl font-semibold mb-4">Flashcards</h1>
+      {/** React island for interactive management view */}
+      <FlashcardsApp client:only="react" />
+    </section>
+  </main>
+</Layout>

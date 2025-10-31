@@ -7,7 +7,6 @@
 
 import type { APIRoute } from "astro";
 import { ZodError } from "zod";
-import { supabaseClient } from "../../../db/supabase.client";
 import {
   createFlashcards,
   validateGenerationExists,
@@ -23,8 +22,24 @@ export const prerender = false;
 /**
  * POST handler for creating flashcards
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
+    const supabase = locals.supabase;
+    const session = locals.session ?? null;
+
+    if (!supabase || !session) {
+      const errorResponse: ErrorResponseDTO = {
+        error: "Unauthorized",
+        message: "Authentication required",
+        code: "AUTHENTICATION_REQUIRED",
+        timestamp: new Date().toISOString(),
+      };
+      return new Response(JSON.stringify(errorResponse), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     // Parse and validate request body
     const body = await request.json();
     const validatedInput = CreateFlashcardsCommandSchema.parse(body);
@@ -36,7 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Validate generation exists if flashcards are AI-generated
     if (generationId !== null && generationId !== undefined) {
       try {
-        await validateGenerationExists(supabaseClient, generationId);
+        await validateGenerationExists(supabase, generationId);
       } catch {
         const errorResponse: ErrorResponseDTO = {
           error: "Not Found",
@@ -55,11 +70,12 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Create flashcards in database
-    const createdFlashcards = await createFlashcards(supabaseClient, validatedInput.flashcards);
+    const userId = getUserId(session);
+    const createdFlashcards = await createFlashcards(supabase, validatedInput.flashcards, userId);
 
     // Update acceptance counts for AI-generated flashcards
     if (generationId !== null && generationId !== undefined) {
-      await updateAcceptanceCounts(supabaseClient, generationId, validatedInput.flashcards);
+      await updateAcceptanceCounts(supabase, generationId, validatedInput.flashcards);
     }
 
     // Map to DTOs (omit user_id)

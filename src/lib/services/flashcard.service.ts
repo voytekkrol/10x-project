@@ -40,11 +40,12 @@ export async function validateGenerationExists(supabase: SupabaseClient, generat
  */
 export async function createFlashcards(
   supabase: SupabaseClient,
-  flashcards: FlashcardCreateDto[]
+  flashcards: FlashcardCreateDto[],
+  userId?: string
 ): Promise<FlashcardRow[]> {
   // Map DTOs to database insert format
   const flashcardsToInsert: FlashcardInsert[] = flashcards.map((flashcard) => ({
-    user_id: null, // Development mode - no authentication
+    user_id: userId ?? null,
     front: flashcard.front.trim(),
     back: flashcard.back.trim(),
     source: flashcard.source,
@@ -141,10 +142,11 @@ export async function listFlashcards(params: {
   const to = offset + limit - 1;
 
   // Build base data query
+  const includeNullUser = import.meta.env.DEV;
   let dataQuery = supabase
     .from("flashcards")
     .select("id, front, back, source, generation_id, created_at, updated_at")
-    .eq("user_id", userId)
+    .or(includeNullUser ? `user_id.eq.${userId},user_id.is.null` : `user_id.eq.${userId}`)
     .order("created_at", { ascending: sort === "asc" })
     .range(offset, to);
 
@@ -160,7 +162,10 @@ export async function listFlashcards(params: {
     dataQuery,
     // Separate count query with identical filters
     (() => {
-      let countQuery = supabase.from("flashcards").select("id", { count: "exact", head: true }).eq("user_id", userId);
+      let countQuery = supabase
+        .from("flashcards")
+        .select("id", { count: "exact", head: true })
+        .or(includeNullUser ? `user_id.eq.${userId},user_id.is.null` : `user_id.eq.${userId}`);
 
       if (query.source) {
         countQuery = countQuery.eq("source", query.source);
@@ -206,12 +211,13 @@ export async function getFlashcardById(params: {
   id: number;
 }): Promise<FlashcardDTO | null> {
   const { supabase, userId, id } = params;
+  const includeNullUser = import.meta.env.DEV;
 
   const { data, error } = await supabase
     .from("flashcards")
-    .select("id, front, back, source, generation_id, created_at, updated_at")
+    .select("id, front, back, source, generation_id, created_at, updated_at, user_id")
     .eq("id", id)
-    .eq("user_id", userId)
+    .or(includeNullUser ? `user_id.eq.${userId},user_id.is.null` : `user_id.eq.${userId}`)
     .maybeSingle();
 
   if (error) {
@@ -247,12 +253,13 @@ export async function deleteFlashcard(params: {
   id: number;
 }): Promise<boolean> {
   const { supabase, userId, id } = params;
+  const includeNullUser = import.meta.env.DEV;
 
   const { error, count } = await supabase
     .from("flashcards")
     .delete({ count: "exact" })
     .eq("id", id)
-    .eq("user_id", userId);
+    .or(includeNullUser ? `user_id.eq.${userId},user_id.is.null` : `user_id.eq.${userId}`);
 
   if (error) {
     // eslint-disable-next-line no-console
@@ -275,23 +282,69 @@ export async function updateFlashcard(params: {
 }): Promise<FlashcardDTO | null> {
   const { supabase, userId, id, command } = params;
 
+  // Handle undefined values from command
+  if (command.front === undefined || command.back === undefined) {
+    throw new Error("Front and back fields are required for update");
+  }
+
   const updates = {
     front: command.front.trim(),
     back: command.back.trim(),
   } as const;
 
-  const { data, error } = await supabase
+  const includeNullUser = import.meta.env.DEV;
+
+  // In development, attempt to claim ownership of legacy rows with null user_id
+  if (includeNullUser) {
+    await supabase.from("flashcards").update({ user_id: userId }).eq("id", id).is("user_id", null);
+  }
+
+  type FlashcardSelectResult = Pick<
+    FlashcardRow,
+    "id" | "front" | "back" | "source" | "generation_id" | "created_at" | "updated_at"
+  >;
+
+  let data: FlashcardSelectResult | null = null;
+  let error: unknown = null;
+
+  if (includeNullUser) {
+    // Dev path: try updating by id only first to handle legacy rows
+    const devAttempt = await supabase
+      .from("flashcards")
+      .update(updates)
+      .eq("id", id)
+      .select("id, front, back, source, generation_id, created_at, updated_at")
+      .maybeSingle();
+    data = devAttempt.data;
+    error = devAttempt.error ?? null;
+    if (!error && data) {
+      return {
+        id: data.id,
+        front: data.front,
+        back: data.back,
+        source: data.source as FlashcardDTO["source"],
+        generation_id: data.generation_id,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+      };
+    }
+  }
+
+  const normalAttempt = await supabase
     .from("flashcards")
     .update(updates)
     .eq("id", id)
-    .eq("user_id", userId)
+    .or(includeNullUser ? `user_id.eq.${userId},user_id.is.null` : `user_id.eq.${userId}`)
     .select("id, front, back, source, generation_id, created_at, updated_at")
     .maybeSingle();
+  data = normalAttempt.data;
+  error = normalAttempt.error ?? null;
 
   if (error) {
     // eslint-disable-next-line no-console
     console.error("Failed to update flashcard:", { id, userId, error });
-    throw new Error("Failed to update flashcard");
+    // Return null so API can respond with 404 rather than 500 on permission/ownership issues
+    return null;
   }
 
   if (!data) {
